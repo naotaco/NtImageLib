@@ -23,6 +23,8 @@ namespace NtImageProcessor
         
         private int[] red, green, blue;
 
+        private int shiftBytes;
+
         public enum HistogramResolution {
             Resolution_256,
             Resolution_128,
@@ -50,18 +52,23 @@ namespace NtImageProcessor
             {
                 case HistogramResolution.Resolution_256:
                     Resolution = 256;
+                    shiftBytes = 0;
                     break;
                 case HistogramResolution.Resolution_128:
                     Resolution = 128;
+                    shiftBytes = 1;
                     break;
                 case HistogramResolution.Resolution_64:
                     Resolution = 64;
+                    shiftBytes = 2;
                     break;
                 case HistogramResolution.Resolution_32:
                     Resolution = 32;
+                    shiftBytes = 3;
                     break;
                 default:
                     Resolution = 256;
+                    shiftBytes = 0;
                     break;
             }
             
@@ -106,24 +113,7 @@ namespace NtImageProcessor
 
         private void CalculateHistogram()
         {
-            // Debug.WriteLine("start calculate");
-
-            int shift = 0;
-            switch (histogramResolution)
-            {
-                case HistogramResolution.Resolution_256:
-                    break;
-                case HistogramResolution.Resolution_128:
-                    shift = 1;
-                    break;
-                case HistogramResolution.Resolution_64:
-                    shift = 2;
-                    break;
-                case HistogramResolution.Resolution_32:
-                    shift = 3;
-                    break;
-            }
-
+ 
             foreach (int v in writableBitmap.Pixels)
             {
                 int value = v;
@@ -134,11 +124,11 @@ namespace NtImageProcessor
                 value = value >> 8;
                 int r = value & 0xFF;
 
-                if (shift != 0)
+                if (shiftBytes != 0)
                 {
-                    r = r >> shift;
-                    g = g >> shift;
-                    b = b >> shift;
+                    r = r >> shiftBytes;
+                    g = g >> shiftBytes;
+                    b = b >> shiftBytes;
                 }
 
                 red[r]++;
