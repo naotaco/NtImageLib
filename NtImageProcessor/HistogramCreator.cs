@@ -1,37 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Net;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace NtImageProcessor
 {
     public class HistogramCreator
     {
-        private BitmapImage image;
-        private WriteableBitmap writableBitmap;
-        
         private int[] red, green, blue;
 
         private int shiftBytes;
 
-        public enum HistogramResolution {
+        public enum HistogramResolution
+        {
             Resolution_256,
             Resolution_128,
             Resolution_64,
             Resolution_32,
         };
-        
+
         public int MaxFrequency { get; set; }
         public int Resolution { get; set; }
         private HistogramResolution histogramResolution;
@@ -71,7 +58,7 @@ namespace NtImageProcessor
                     shiftBytes = 0;
                     break;
             }
-            
+
             _init();
 
         }
@@ -92,7 +79,7 @@ namespace NtImageProcessor
             IsRunning = false;
         }
 
-        public void CreateHistogram(BitmapImage source)
+        public async Task CreateHistogram(BitmapImage source)
         {
             if (IsRunning)
             {
@@ -103,21 +90,19 @@ namespace NtImageProcessor
             _init();
 
             IsRunning = true;
-           
-            writableBitmap = new WriteableBitmap(source);
-            var thread = new System.Threading.Thread(CalculateHistogram);
-            Debug.WriteLine("starting thread: " + thread.ManagedThreadId);
-            thread.Start();
-            // Debug.WriteLine("started thread: " + thread.ManagedThreadId);
+
+            var writeableBitmap = new WriteableBitmap(source);
+
+            await Task.Run(() => { CalculateHistogram(writeableBitmap); });
         }
 
-        private void CalculateHistogram()
+        private void CalculateHistogram(WriteableBitmap writableBitmap)
         {
- 
+
             foreach (int v in writableBitmap.Pixels)
             {
                 int value = v;
-                
+
                 int b = (value & 0xFF);
                 value = value >> 8;
                 int g = (value & 0xFF);
@@ -135,7 +120,7 @@ namespace NtImageProcessor
                 green[g]++;
                 blue[b]++;
             }
-            
+
             // normalize values.
             double scaleFactor = (double)MaxFrequency / (double)writableBitmap.Pixels.Length;
             // Debug.WriteLine("scale: " + scaleFactor);
