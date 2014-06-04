@@ -19,7 +19,6 @@ namespace NtImageProcessor
             Resolution_32,
         };
 
-        public int MaxFrequency { get; set; }
         public int Resolution { get; set; }
         private HistogramResolution histogramResolution;
 
@@ -31,9 +30,8 @@ namespace NtImageProcessor
             set;
         }
 
-        public HistogramCreator(HistogramResolution resolution, int maxFrequency)
+        public HistogramCreator(HistogramResolution resolution)
         {
-            MaxFrequency = maxFrequency;
             histogramResolution = resolution;
             switch (resolution)
             {
@@ -99,9 +97,10 @@ namespace NtImageProcessor
         private void CalculateHistogram(WriteableBitmap writableBitmap)
         {
 
-            foreach (int v in writableBitmap.Pixels)
+            //foreach (int v in writableBitmap.Pixels)
+            for (int i = 0; i < writableBitmap.Pixels.Length; i += 13)
             {
-                int value = v;
+                int value = writableBitmap.Pixels[i];
 
                 int b = (value & 0xFF);
                 value = value >> 8;
@@ -120,18 +119,16 @@ namespace NtImageProcessor
                 green[g]++;
                 blue[b]++;
             }
-
+            
             // normalize values.
-            double scaleFactor = (double)MaxFrequency / (double)writableBitmap.Pixels.Length;
-            // Debug.WriteLine("scale: " + scaleFactor);
-
+            
             for (int i = 0; i < Resolution; i++)
             {
-                red[i] = (int)((double)red[i] * scaleFactor);
-                green[i] = (int)((double)green[i] * scaleFactor);
-                blue[i] = (int)((double)blue[i] * scaleFactor);
+                red[i] = red[i] >> 2;
+                green[i] = green[i] >> 2;
+                blue[i] = blue[i] >> 2;
             }
-
+            
             if (OnHistogramCreated != null)
             {
                 OnHistogramCreated(red, green, blue);
