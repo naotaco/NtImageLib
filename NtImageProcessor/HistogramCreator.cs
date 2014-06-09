@@ -98,7 +98,7 @@ namespace NtImageProcessor
         {
 
             //foreach (int v in writableBitmap.Pixels)
-            for (int i = 0; i < writableBitmap.Pixels.Length; i += 13)
+            for (int i = 0; i < writableBitmap.Pixels.Length; i += 3)
             {
                 int value = writableBitmap.Pixels[i];
 
@@ -124,9 +124,9 @@ namespace NtImageProcessor
             
             for (int i = 0; i < Resolution; i++)
             {
-                red[i] = red[i] >> 2;
-                green[i] = green[i] >> 2;
-                blue[i] = blue[i] >> 2;
+                red[i] = red[i] >> 4;
+                green[i] = green[i] >> 4;
+                blue[i] = blue[i] >> 4;
             }
             
             if (OnHistogramCreated != null)
