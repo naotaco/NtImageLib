@@ -84,7 +84,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Histogram\HistogramCreator.cs" />
+    <Compile Include="MetaData\Composer\ExifOperator.cs" />
     <Compile Include="MetaData\Composer\IfdComposer.cs" />
+    <Compile Include="MetaData\Misc\GpsIfdDataCreator.cs" />
     <Compile Include="MetaData\Misc\GpsInformationAlreadyExistsException.cs" />
     <Compile Include="MetaData\Misc\InvalidTypeException.cs" />
     <Compile Include="MetaData\Misc\UnsupportedFileFormatException.cs" />

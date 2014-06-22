@@ -121,6 +121,14 @@ namespace NtImageProcessor.MetaData.Misc
             return value;
         }
 
+        public static double ToRoundUp(double dValue, int iDigits)
+        {
+            double dCoef = System.Math.Pow(10, iDigits);
+
+            return dValue > 0 ? System.Math.Ceiling(dValue * dCoef) / dCoef :
+                                System.Math.Floor(dValue * dCoef) / dCoef;
+        }
+
         public static int ConvertToDataSize(NtImageProcessor.MetaData.Structure.Entry.EntryType t)
         {
             int valueSize = 0;
