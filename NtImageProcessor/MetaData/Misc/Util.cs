@@ -59,6 +59,43 @@ namespace NtImageProcessor.MetaData.Misc
             return ret;
         }
 
+        public static UnsignedFraction ConvertoToUnsignedFraction(double value)
+        {
+            var fraction = new UnsignedFraction();
+            UInt32 denominator = 1;
+            while (value - System.Math.Floor(value) != 0)
+            {
+                value *= 10;
+                denominator *= 10;
+            }
+
+            fraction.Numerator = (UInt32)System.Math.Floor(value);
+            fraction.Denominator = denominator;
+            return fraction;
+        }
+
+        public static byte[] ConvertToByte(UnsignedFraction value)
+        {
+            var ret = new byte[8];
+            Array.Copy(Util.ConvertToByte(value.Numerator, 4), 0, ret, 0, 4);
+            Array.Copy(Util.ConvertToByte(value.Denominator, 4), 0, ret, 4, 4);
+            return ret;
+        }
+
+        public static byte[] ConvertToByte(string str)
+        {
+            var ret = new byte[str.Length + 1];
+            int i = 0;
+            foreach (char c in str)
+            {
+                ret[i] = (byte)c;
+                i++;
+            }
+            ret[str.Length] = 0;
+            Debug.WriteLine(str + " " + ret.Length);
+            return ret;
+        }
+        
         public static Int32 GetSIntValue(byte[] data, int address, int length)
         {
             // if bigger than 4 bytes, can't set to int type.

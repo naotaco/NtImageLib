@@ -22,7 +22,8 @@ namespace NtImageProcessor.MetaData
 
         private const UInt32 EXIF_IFD_POINTER_TAG = 0x8769;
         private const UInt32 GPS_IFD_POINTER_TAG = 0x8825;
-                
+
+               
         public static ExifData ParseImage(byte[] image)
         {
             Debug.WriteLine("ParseImage start. image length: " + image.Length);
@@ -51,6 +52,7 @@ namespace NtImageProcessor.MetaData
             }
 
             byte[] App1Data = new Byte[App1Size];
+            exif.App1Data = App1Data;
             Array.Copy(image, (int)APP1_OFFSET, App1Data, 0, (int)App1Size);
 
             // Check TIFF header.
@@ -68,18 +70,21 @@ namespace NtImageProcessor.MetaData
             Debug.WriteLine("Primary IFD pointer: " + PrimaryIfdPointer);
 
             // parse primary (0th) IFD section
-            exif.PrimaryIFDEntries = Parser.IfdParser.ParseIfd(App1Data, PrimaryIfdPointer);
+            exif.PrimaryIfd = Parser.IfdParser.ParseIfd(App1Data, PrimaryIfdPointer);
+            Debug.WriteLine("Primary offset: " + exif.PrimaryIfd.Offset + " length: " + exif.PrimaryIfd.Length + " next ifd: " + exif.PrimaryIfd.NextIfdPointer);
 
             // parse Exif IFD section
-            if (exif.PrimaryIFDEntries.ContainsKey(EXIF_IFD_POINTER_TAG))
+            if (exif.PrimaryIfd.Entries.ContainsKey(EXIF_IFD_POINTER_TAG))
             {
-                exif.ExifIfdEntries = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIFDEntries[EXIF_IFD_POINTER_TAG].IntValues[0]);
+                exif.ExifIfd = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIfd.Entries[EXIF_IFD_POINTER_TAG].IntValues[0]);
+                Debug.WriteLine("Exif offset: " + exif.ExifIfd.Offset + " length: " + exif.ExifIfd.Length);
             }
 
             // parse GPS data.
-            if (exif.PrimaryIFDEntries.ContainsKey(GPS_IFD_POINTER_TAG))
+            if (exif.PrimaryIfd.Entries.ContainsKey(GPS_IFD_POINTER_TAG))
             {
-                exif.GpsIfdEntries = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIFDEntries[GPS_IFD_POINTER_TAG].IntValues[0]);
+                exif.GpsIfd = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIfd.Entries[GPS_IFD_POINTER_TAG].IntValues[0]);
+                Debug.WriteLine("GPS offset: " + exif.GpsIfd.Offset + " length: " + exif.GpsIfd.Length);
             }
 
             return exif;

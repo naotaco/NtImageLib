@@ -16,8 +16,10 @@ namespace NtImageProcessor.MetaData.Composer
         /// <param name="data">Dictionary of Entry data in target IFD data</param>
         /// <param name="SectionOffset">Offset of this IFD section from TIFF header.</param>
         /// <returns></returns>
-        public static byte[] ComposeIfdsection(Dictionary<UInt32, Entry> data, UInt32 SectionOffset)
+        public static byte[] ComposeIfdsection(IfdData ifd)
         {
+            var data = ifd.Entries;
+
             // calcurate total size of IFD
             var TotalSize = 2; // number of entry
             UInt32 count = 0;
@@ -80,7 +82,7 @@ namespace NtImageProcessor.MetaData.Composer
                     Array.Copy(data[key].value, 0, ComposedData, (int)ExtraDataSectionOffset, data[key].value.Length);
 
                     // store pointer for extra area. Origin of pointer should be position of TIFF header.
-                    var offset = Util.ConvertToByte(ExtraDataSectionOffset + SectionOffset, 4);
+                    var offset = Util.ConvertToByte(ExtraDataSectionOffset + ifd.Offset, 4);
                     Array.Copy(offset, 0, ComposedData, pointer, 4);
 
 

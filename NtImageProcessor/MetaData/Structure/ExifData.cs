@@ -27,22 +27,27 @@ namespace NtImageProcessor.MetaData.Structure
         /// <summary>
         /// Stores  entries in Primary IFD (known as 0th IFD).
         /// </summary>
-        public Dictionary<UInt32, Entry> PrimaryIFDEntries { get; set; }
+        public IfdData PrimaryIfd { get; set; }
 
         /// <summary>
         /// Stores entries in EXIF IFD.
         /// </summary>
-        public Dictionary<UInt32, Entry> ExifIfdEntries { get; set; }
+        public IfdData ExifIfd { get; set; }
 
         /// <summary>
         /// Stores enties in GPS IFD.
         /// </summary>
-        public Dictionary<UInt32, Entry> GpsIfdEntries { get; set; }
+        public IfdData GpsIfd { get; set; }
 
         /// <summary>
         /// Stores all data other than supported IFD sections as Raw byte array.
         /// </summary>
         public byte[] UnsupportedData { get; set; }
+
+        /// <summary>
+        /// Raw data of App1 section.
+        /// </summary>
+        public byte[] App1Data { get; set; }
 
         public ExifData() { }
 

@@ -1,6 +1,7 @@
 ﻿using NtImageProcessor.MetaData.Misc;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -96,6 +97,17 @@ namespace NtImageProcessor.MetaData.Structure
                 }
                 return v;
             }
+            set
+            {
+                var newValue = new byte[value.Length * Util.ConvertToDataSize(this.Type)];
+                for (int i = 0; i < value.Length; i++)
+                {
+                    Debug.WriteLine("value: " + value[i]);
+                    var v = Util.ConvertToByte(value[i], Util.ConvertToDataSize(this.Type));
+                    Array.Copy(v, 0, newValue, i * Util.ConvertToDataSize(this.Type), v.Length);
+                }
+                this.value = newValue;
+            }
         }
 
         /// <summary>
@@ -159,6 +171,18 @@ namespace NtImageProcessor.MetaData.Structure
                     v[i] = val;
                 }
                 return v;
+            }
+            set
+            {
+                var newValue = new byte[value.Length * 8];
+                for (int i = 0; i < value.Length; i++)
+                {
+                    var f = Util.ConvertoToUnsignedFraction(value[i]);
+                    var v = Util.ConvertToByte(f);
+                    Debug.WriteLine("val " + value[i] + " " + f.Numerator + "/" + f.Denominator);
+                    Array.Copy(v, 0, newValue, i * 8, 8);
+                }
+                this.value = newValue;
             }
         }
 
