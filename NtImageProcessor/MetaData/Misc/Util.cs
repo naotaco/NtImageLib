@@ -37,6 +37,28 @@ namespace NtImageProcessor.MetaData.Misc
             return value;
         }
 
+        public static byte[] ConvertToByte(UInt32 value, int length)
+        {
+            if (length > 4)
+            {
+                throw new InvalidCastException();
+            }
+            var ret = new byte[length];
+            if (IsLittleEndian)
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    ret[i] = (byte)(value & 0xFF);
+                    value = value >> 8;
+                    // Debug.WriteLine("byte: " + ret[i].ToString("X"));
+                }
+            }
+            else
+            {
+            }
+            return ret;
+        }
+
         public static Int32 GetSIntValue(byte[] data, int address, int length)
         {
             // if bigger than 4 bytes, can't set to int type.
@@ -114,6 +136,33 @@ namespace NtImageProcessor.MetaData.Misc
                     return Entry.EntryType.SRational;
                 default:
                     return Entry.EntryType.Undefined;
+            }
+        }
+
+        public static UInt32 ConvertFromEntryType(Entry.EntryType value)
+        {
+            switch (value)
+            {
+                case Entry.EntryType.Byte:
+                    return 0x1;
+                case Entry.EntryType.Ascii:
+                    return 0x2;
+                case Entry.EntryType.Short:
+                    return 0x3;
+                case Entry.EntryType.Long:
+                    return 0x4;
+                case Entry.EntryType.Rational:
+                    return 0x5;
+                case Entry.EntryType.Undefined:
+                    return 0x7;
+                case Entry.EntryType.SShort:
+                    return 0x8;
+                case Entry.EntryType.SLong:
+                    return 0x9;
+                case Entry.EntryType.SRational:
+                    return 0xA;
+                default:
+                    return 0x0;
             }
         }
 

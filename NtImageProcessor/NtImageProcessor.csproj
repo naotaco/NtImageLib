@@ -84,6 +84,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Histogram\HistogramCreator.cs" />
+    <Compile Include="MetaData\Composer\IfdComposer.cs" />
     <Compile Include="MetaData\Misc\InvalidTypeException.cs" />
     <Compile Include="MetaData\Misc\UnsupportedFileFormatException.cs" />
     <Compile Include="MetaData\Misc\Util.cs" />

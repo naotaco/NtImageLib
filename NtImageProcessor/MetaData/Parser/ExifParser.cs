@@ -82,7 +82,7 @@ namespace NtImageProcessor.MetaData
                 exif.GpsIfdEntries = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIFDEntries[GPS_IFD_POINTER_TAG].IntValues[0]);
             }
 
-            return null;
+            return exif;
         }
 
         public static byte[] SetExifData(ExifData e)
