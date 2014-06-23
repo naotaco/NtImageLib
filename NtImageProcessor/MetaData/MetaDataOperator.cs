@@ -25,10 +25,22 @@ namespace NtImageProcessor.MetaData
 
             Debug.WriteLine("Longitude : " + position.Coordinate.Longitude + " Latitude: " + position.Coordinate.Latitude);
 
+            // parse given image first
+            var exif = ExifParser.ParseImage(image);
+
+            if (exif.PrimaryIfd.Entries.ContainsKey(0x8825))
+            {
+                Debug.WriteLine("This image contains GPS information. Return.");
+                throw new GpsInformationAlreadyExistsException("This image contains GPS information.");
+            }
+
+            // Create IFD structure from given GPS info
             var gpsIfdData = GpsIfdDataCreator.CreateGpsIfdData(position);
 
-            return ExifOperator.InsertGpsIfdSection(image, gpsIfdData);
+            // Add GPS info to exif structure
+            exif.GpsIfd = gpsIfdData;
 
+            return ExifProcessor.SetExifData(image, exif);
         }
     }
 }

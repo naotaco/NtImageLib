@@ -10,9 +10,12 @@ namespace NtImageProcessor.MetaData.Misc
 {
     public static class Util
     {
-        private const bool IsLittleEndian = true;
-
         public static UInt32 GetUIntValue(byte[] data, int address, int length)
+        {
+            return GetUIntValue(data, address, length, true);
+        }
+
+        public static UInt32 GetUIntValue(byte[] data, int address, int length, bool IsLittleEndian)
         {
             // if bigger than 4 bytes, can't set to int type.
             if (length > 4)
@@ -38,6 +41,11 @@ namespace NtImageProcessor.MetaData.Misc
         }
 
         public static byte[] ConvertToByte(UInt32 value, int length)
+        {
+            return ConvertToByte(value, length, true);
+        }
+
+        public static byte[] ConvertToByte(UInt32 value, int length, bool IsLittleEndian)
         {
             if (length > 4)
             {
@@ -95,8 +103,13 @@ namespace NtImageProcessor.MetaData.Misc
             Debug.WriteLine(str + " " + ret.Length);
             return ret;
         }
-        
+
         public static Int32 GetSIntValue(byte[] data, int address, int length)
+        {
+            return GetSIntValue(data, address, length, true);
+        }
+        
+        public static Int32 GetSIntValue(byte[] data, int address, int length, bool IsLittleEndian)
         {
             // if bigger than 4 bytes, can't set to int type.
             if (length > 4)

@@ -11,9 +11,9 @@ namespace NtImageProcessor.MetaData.Composer
     public static class IfdComposer
     {
         /// <summary>
-        /// Build byte data from IFD section data.
+        /// Build byte data from IFD  data.
         /// </summary>
-        /// <param name="data">Dictionary of Entry data in target IFD data</param>
+        /// <param name="ifd">IFD structure which will be composed to binary data.</param>
         /// <param name="SectionOffset">Offset of this IFD section from TIFF header.</param>
         /// <returns></returns>
         public static byte[] ComposeIfdsection(IfdData ifd)

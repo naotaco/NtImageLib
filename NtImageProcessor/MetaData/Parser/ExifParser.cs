@@ -11,17 +11,7 @@ namespace NtImageProcessor.MetaData
 {
     public static class ExifParser
     {
-        private const UInt32 JPEG_SOI_MARKER = 0xD8FF;
-        private const UInt32 APP1_MARKER = 0xE1FF;
-        private const UInt32 APP1_OFFSET = 0x0C;
 
-        private const UInt32 TIFF_BIG_ENDIAN = 0x4D4D;
-        private const UInt32 TIFF_LITTLE_ENDIAN = 0x4949;
-
-        private const UInt32 TIFF_IDENTIFY_CODE = 0x002A;
-
-        private const UInt32 EXIF_IFD_POINTER_TAG = 0x8769;
-        private const UInt32 GPS_IFD_POINTER_TAG = 0x8825;
 
                
         public static ExifData ParseImage(byte[] image)
@@ -31,19 +21,19 @@ namespace NtImageProcessor.MetaData
             var exif = new ExifData();
 
             // check SOI, Start of image marker.
-            if (Util.GetUIntValue(image, 0, 2) != JPEG_SOI_MARKER)
+            if (Util.GetUIntValue(image, 0, 2, false) != Definitions.JPEG_SOI_MARKER)
             {
-                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(image, 0, 2));
+                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(image, 0, 2, false));
             }
 
             // check APP1 maerker
-            if (Util.GetUIntValue(image, 2, 2) != APP1_MARKER)
+            if (Util.GetUIntValue(image, 2, 2, false) != Definitions.APP1_MARKER)
             {
-                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(image, 2, 2));
+                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(image, 2, 2, false));
             }
 
-            UInt32 App1Size = Util.GetUIntValue(image, 4, 2);
-            Debug.WriteLine("App1 size: " + App1Size);
+            UInt32 App1Size = Util.GetUIntValue(image, 4, 2, false);
+            Debug.WriteLine("App1 size: " + App1Size.ToString("X"));
 
             var exifHeader = Encoding.UTF8.GetString(image, 6, 4);
             if (exifHeader != "Exif")
@@ -53,14 +43,14 @@ namespace NtImageProcessor.MetaData
 
             byte[] App1Data = new Byte[App1Size];
             exif.App1Data = App1Data;
-            Array.Copy(image, (int)APP1_OFFSET, App1Data, 0, (int)App1Size);
+            Array.Copy(image, (int)Definitions.APP1_OFFSET, App1Data, 0, (int)App1Size);
 
             // Check TIFF header.
-            if (Util.GetUIntValue(App1Data, 0, 2) != TIFF_LITTLE_ENDIAN)
+            if (Util.GetUIntValue(App1Data, 0, 2) != Definitions.TIFF_LITTLE_ENDIAN)
             {
                 throw new UnsupportedFileFormatException("Currently, only little endian is supported.");
             }
-            if (Util.GetUIntValue(App1Data, 2, 2) != TIFF_IDENTIFY_CODE)
+            if (Util.GetUIntValue(App1Data, 2, 2) != Definitions.TIFF_IDENTIFY_CODE)
             {
                 throw new UnsupportedFileFormatException("TIFF identify code (0x2A00) couldn't find.");
             }
@@ -74,16 +64,16 @@ namespace NtImageProcessor.MetaData
             Debug.WriteLine("Primary offset: " + exif.PrimaryIfd.Offset + " length: " + exif.PrimaryIfd.Length + " next ifd: " + exif.PrimaryIfd.NextIfdPointer);
 
             // parse Exif IFD section
-            if (exif.PrimaryIfd.Entries.ContainsKey(EXIF_IFD_POINTER_TAG))
+            if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
             {
-                exif.ExifIfd = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIfd.Entries[EXIF_IFD_POINTER_TAG].IntValues[0]);
+                exif.ExifIfd = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIfd.Entries[Definitions.EXIF_IFD_POINTER_TAG].IntValues[0]);
                 Debug.WriteLine("Exif offset: " + exif.ExifIfd.Offset + " length: " + exif.ExifIfd.Length);
             }
 
             // parse GPS data.
-            if (exif.PrimaryIfd.Entries.ContainsKey(GPS_IFD_POINTER_TAG))
+            if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
             {
-                exif.GpsIfd = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIfd.Entries[GPS_IFD_POINTER_TAG].IntValues[0]);
+                exif.GpsIfd = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIfd.Entries[Definitions.GPS_IFD_POINTER_TAG].IntValues[0]);
                 Debug.WriteLine("GPS offset: " + exif.GpsIfd.Offset + " length: " + exif.GpsIfd.Length);
             }
 
