@@ -81,7 +81,7 @@ namespace NtImageProcessor.MetaData.Misc
             var LonDeg = Math.Floor(position.Coordinate.Longitude);
             var LonMin = Math.Floor((position.Coordinate.Longitude - LonDeg) * 60);
             var LonSec = Util.ToRoundUp(((position.Coordinate.Longitude - LonDeg) * 60 - LonMin), 3);
-            LongitudeRef.DoubleValues = new double[] { LonDeg, LonMin, LonSec };
+            Longitude.DoubleValues = new double[] { LonDeg, LonMin, LonSec };
             gpsIfdData.Entries.Add(Longitude.Tag, Longitude);
 
             var TimeStampEntry = new Entry()

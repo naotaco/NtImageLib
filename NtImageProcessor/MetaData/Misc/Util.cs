@@ -63,6 +63,12 @@ namespace NtImageProcessor.MetaData.Misc
             }
             else
             {
+                for (int i = length - 1; i >= 0; i--)
+                {
+                    ret[i] = (byte)(value & 0xFF);
+                    value = value >> 8;
+                    // Debug.WriteLine("byte: " + ret[i].ToString("X"));
+                }
             }
             return ret;
         }
