@@ -19,8 +19,6 @@ namespace NtImageProcessor.MetaData.Composer
         /// <returns></returns>
         public static byte[] ComposeIfdsection(IfdData ifd)
         {
-            Debug.WriteLine("start");
-
             var data = ifd.Entries;
 
             // calcurate total size of IFD
@@ -28,7 +26,6 @@ namespace NtImageProcessor.MetaData.Composer
             UInt32 count = 0;
             foreach (Entry entry in data.Values)
             {
-                Debug.WriteLine("loop1 " + entry.Tag + " " + entry.value.Length);
                 count++;
                 TotalSize += 12;
 
@@ -62,8 +59,6 @@ namespace NtImageProcessor.MetaData.Composer
             int pointer = 2;
             foreach (UInt32 key in keys)
             {
-                Debug.WriteLine("loop");
-
                 // tag in 2 bytes.
                 var tag = Util.ConvertToByte(data[key].Tag, 2);
                 Array.Copy(tag, 0, ComposedData, pointer, 2);
@@ -100,7 +95,6 @@ namespace NtImageProcessor.MetaData.Composer
                 pointer += 4;
 
             }
-            Debug.WriteLine("loop end");
 
             return ComposedData;
         }
