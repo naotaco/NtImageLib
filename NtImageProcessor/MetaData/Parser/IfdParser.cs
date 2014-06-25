@@ -77,7 +77,7 @@ namespace NtImageProcessor.MetaData.Parser
 
                 entry.value = valueBuff;
 
-                /*
+                
                 switch (entry.Type)
                 {
                     case Entry.EntryType.Ascii:
@@ -117,7 +117,6 @@ namespace NtImageProcessor.MetaData.Parser
                     default:
                         break;
                 }
-                 * */
 
                 entries[entry.Tag] = entry;
             }

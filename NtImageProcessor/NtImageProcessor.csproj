@@ -96,7 +96,7 @@
     <Compile Include="MetaData\MetaDataOperator.cs" />
     <Compile Include="MetaData\Parser\IfdParser.cs" />
     <Compile Include="MetaData\Structure\Entry.cs" />
-    <Compile Include="MetaData\Structure\ExifData.cs" />
+    <Compile Include="MetaData\Structure\JpegMetaData.cs" />
     <Compile Include="MetaData\Structure\Fraction.cs" />
     <Compile Include="MetaData\Structure\IfdData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

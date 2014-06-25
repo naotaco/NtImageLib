@@ -22,7 +22,7 @@ namespace NtImageProcessor.MetaData.Composer
             var data = ifd.Entries;
 
             // calcurate total size of IFD
-            var TotalSize = 2; // number of entry
+            var TotalSize = 2; // TIFF HEader +  number of entry
             UInt32 count = 0;
             foreach (Entry entry in data.Values)
             {
@@ -51,6 +51,7 @@ namespace NtImageProcessor.MetaData.Composer
             Debug.WriteLine("Nexf IFD: " + ifd.NextIfdPointer.ToString("X")); 
 
             Array.Copy(ifdPointerValue, 0, ComposedData, 2 + 12 * (int)count, 4);
+            // TIFF header, number of entry, each entries, Nexf IFD pointer.
             var ExtraDataSectionOffset = (UInt32)(2 + 12 * (int)count + 4);
 
             var keys = data.Keys.ToArray<UInt32>();
@@ -95,6 +96,7 @@ namespace NtImageProcessor.MetaData.Composer
                 pointer += 4;
 
             }
+            Debug.WriteLine("ExtraSectionOffset: " + ExtraDataSectionOffset + " data length: " + ComposedData.Length);
 
             return ComposedData;
         }

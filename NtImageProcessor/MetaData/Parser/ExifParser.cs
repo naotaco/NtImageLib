@@ -14,11 +14,11 @@ namespace NtImageProcessor.MetaData
 
 
                
-        public static ExifData ParseImage(byte[] image)
+        public static JpegMetaData ParseImage(byte[] image)
         {
             Debug.WriteLine("ParseImage start. image length: " + image.Length);
 
-            var exif = new ExifData();
+            var exif = new JpegMetaData();
 
             // check SOI, Start of image marker.
             if (Util.GetUIntValue(image, 0, 2, false) != Definitions.JPEG_SOI_MARKER)
@@ -80,7 +80,7 @@ namespace NtImageProcessor.MetaData
             return exif;
         }
 
-        public static byte[] SetExifData(ExifData e)
+        public static byte[] SetExifData(JpegMetaData e)
         {
             return null;
 

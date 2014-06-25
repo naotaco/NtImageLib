@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NtImageProcessor.MetaData.Structure
 {
-    public class ExifData
+    public class JpegMetaData
     {
         public enum Endian
         {
@@ -40,16 +40,11 @@ namespace NtImageProcessor.MetaData.Structure
         public IfdData GpsIfd { get; set; }
 
         /// <summary>
-        /// Stores all data other than supported IFD sections as Raw byte array.
-        /// </summary>
-        public byte[] UnsupportedData { get; set; }
-
-        /// <summary>
         /// Raw data of App1 section.
         /// </summary>
         public byte[] App1Data { get; set; }
 
-        public ExifData() { }
+        public JpegMetaData() { }
 
 
     }
