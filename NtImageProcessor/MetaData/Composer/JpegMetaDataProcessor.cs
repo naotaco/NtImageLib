@@ -176,11 +176,6 @@ namespace NtImageProcessor.MetaData.Composer
             // At last, copy body from original image.
             Array.Copy(OriginalImage, 2 + 2 + 2 + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - (int)OriginalApp1DataSize);
 
-            Debug.WriteLine("Primary: ");
-            Util.DumpByteArrayAll(primaryIfd);
-            Debug.WriteLine("New image: ");
-            Util.DumpByteArrayAll(NewImage);
-
             return NewImage;
         }
     }
