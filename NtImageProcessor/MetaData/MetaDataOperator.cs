@@ -26,7 +26,7 @@ namespace NtImageProcessor.MetaData
             Debug.WriteLine("Longitude : " + position.Coordinate.Longitude + " Latitude: " + position.Coordinate.Latitude);
 
             // parse given image first
-            var exif = ExifParser.ParseImage(image);
+            var exif = JpegMetaDataParser.ParseImage(image);
 
             if (exif.PrimaryIfd.Entries.ContainsKey(0x8825))
             {
@@ -40,7 +40,7 @@ namespace NtImageProcessor.MetaData
             // Add GPS info to exif structure
             exif.GpsIfd = gpsIfdData;
 
-            return ExifProcessor.SetExifData(image, exif);
+            return JpegMetaDataProcessor.SetMetaData(image, exif);
         }
     }
 }

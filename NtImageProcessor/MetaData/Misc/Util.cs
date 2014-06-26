@@ -58,7 +58,6 @@ namespace NtImageProcessor.MetaData.Misc
                 {
                     ret[i] = (byte)(value & 0xFF);
                     value = value >> 8;
-                    // Debug.WriteLine("byte: " + ret[i].ToString("X"));
                 }
             }
             else
@@ -174,6 +173,51 @@ namespace NtImageProcessor.MetaData.Misc
                     break;
             }
             return valueSize;
+        }
+
+        public static void DumpFirst16byte(byte[] data)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 16; i++)
+            {
+                if (i > (data.Length - 1))
+                {
+                    break;
+                }
+                sb.Append(data[i].ToString("X2"));
+                sb.Append(" ");
+            }
+            Debug.WriteLine(sb.ToString());
+        }
+
+        public static void DumpByteArray(byte[] array, int from, int length)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = from; i < from + length; i++)
+            {
+                if (i > (array.Length - 1))
+                {
+                    break;
+                }
+                sb.Append(array[i].ToString("X2"));
+                sb.Append(" ");
+            }
+            Debug.WriteLine(sb.ToString());
+        }
+
+        public static void DumpByteArrayAll(byte[] array)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < array.Length; i++)
+            {
+                sb.Append(array[i].ToString("X2"));
+                sb.Append(" ");
+                if (i % 16 == 15)
+                {
+                    sb.Append(Environment.NewLine);
+                }
+            }
+            Debug.WriteLine(sb.ToString());
         }
 
         public static Entry.EntryType ConvertToEntryType(UInt32 value)

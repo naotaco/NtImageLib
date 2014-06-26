@@ -9,11 +9,8 @@ using System.Threading.Tasks;
 
 namespace NtImageProcessor.MetaData
 {
-    public static class ExifParser
-    {
-
-
-               
+    public static class JpegMetaDataParser
+    {               
         public static JpegMetaData ParseImage(byte[] image)
         {
             Debug.WriteLine("ParseImage start. image length: " + image.Length);

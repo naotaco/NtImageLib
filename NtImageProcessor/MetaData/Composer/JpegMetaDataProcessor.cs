@@ -9,22 +9,22 @@ using System.Threading.Tasks;
 
 namespace NtImageProcessor.MetaData.Composer
 {
-    public static class ExifProcessor
+    public static class JpegMetaDataProcessor
     {
         /// <summary>
         /// Set exif data to Jpeg file.
         /// Note that this function overwrites ALL Exif data in the given image.
         /// </summary>
         /// <param name="OriginalImage">Target image</param>
-        /// <param name="exif">An Exif data which will be added to the image.</param>
-        /// <returns></returns>
-        public static byte[] SetExifData(byte[] OriginalImage, JpegMetaData exif)
+        /// <param name="MetaData">An Exif data which will be added to the image.</param>
+        /// <returns>New image</returns>
+        public static byte[] SetMetaData(byte[] OriginalImage, JpegMetaData MetaData)
         {
-            var OriginalMetaData = ExifParser.ParseImage(OriginalImage);
+            var OriginalMetaData = JpegMetaDataParser.ParseImage(OriginalImage);
             Debug.WriteLine("Original image size: " + OriginalImage.Length.ToString("X"));
             
             // All data after this pointer will be kept.
-            var FirstIfdPointer = exif.PrimaryIfd.NextIfdPointer;
+            var FirstIfdPointer = MetaData.PrimaryIfd.NextIfdPointer;
 
             // check SOI, Start of image marker.
             if (Util.GetUIntValue(OriginalImage, 0, 2, false) != Definitions.JPEG_SOI_MARKER)
@@ -49,10 +49,10 @@ namespace NtImageProcessor.MetaData.Composer
 
             // each pointer sections should be updated later (after each sections' size are fixed).
 
-            if (exif.ExifIfd != null && !exif.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
+            if (MetaData.ExifIfd != null && !MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
             {
                 // Add Exif IFD section's pointer entry as dummy.
-                exif.PrimaryIfd.Entries.Add(
+                MetaData.PrimaryIfd.Entries.Add(
                     Definitions.EXIF_IFD_POINTER_TAG, 
                     new Entry() { 
                         Tag = Definitions.EXIF_IFD_POINTER_TAG,
@@ -62,10 +62,10 @@ namespace NtImageProcessor.MetaData.Composer
                     });
             }
 
-            if (exif.GpsIfd != null && !exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
+            if (MetaData.GpsIfd != null && !MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
             {
                 // Add GPS IFD section's pointer entry as dummy
-                exif.PrimaryIfd.Entries.Add(
+                MetaData.PrimaryIfd.Entries.Add(
                     Definitions.GPS_IFD_POINTER_TAG,
                     new Entry()
                     {
@@ -77,30 +77,30 @@ namespace NtImageProcessor.MetaData.Composer
             }
 
 
-            byte[] primaryIfd = IfdComposer.ComposeIfdsection(exif.PrimaryIfd);
+            byte[] primaryIfd = IfdComposer.ComposeIfdsection(MetaData.PrimaryIfd);
             byte[] exifIfd = new byte[] { };
             byte[] gpsIfd = new byte[] { };
-            if (exif.ExifIfd != null)
+            if (MetaData.ExifIfd != null)
             {
-                exifIfd = IfdComposer.ComposeIfdsection(exif.ExifIfd);
+                exifIfd = IfdComposer.ComposeIfdsection(MetaData.ExifIfd);
             }
-            if (exif.GpsIfd != null)
+            if (MetaData.GpsIfd != null)
             {
-                gpsIfd = IfdComposer.ComposeIfdsection(exif.GpsIfd);
+                gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd);
             }
 
             Debug.WriteLine("Size fixed. Primary: " + primaryIfd.Length.ToString("X") + " exif: " + exifIfd.Length.ToString("X") + " gps: " + gpsIfd.Length.ToString("X"));
 
             // after size fixed, set each IFD sections' offset.
-            exif.PrimaryIfd.Offset = 8; // fixed value             
+            MetaData.PrimaryIfd.Offset = 8; // fixed value             
 
             // now it's possible to calcurate pointer to Exif/GPS IFD
             var exifIfdPointer = 8 + primaryIfd.Length;
             var gpsIfdPointer = 8 + primaryIfd.Length + exifIfd.Length;
             
-            if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
+            if (MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
             {
-                exif.PrimaryIfd.Entries.Remove(Definitions.EXIF_IFD_POINTER_TAG);
+                MetaData.PrimaryIfd.Entries.Remove(Definitions.EXIF_IFD_POINTER_TAG);
             }
 
             var exifIfdPointerEntry = new Entry()
@@ -110,11 +110,11 @@ namespace NtImageProcessor.MetaData.Composer
                     Count = 1,
                 };
             exifIfdPointerEntry.IntValues = new UInt32[] { (UInt32)exifIfdPointer };
-            exif.PrimaryIfd.Entries.Add(Definitions.EXIF_IFD_POINTER_TAG, exifIfdPointerEntry);
+            MetaData.PrimaryIfd.Entries.Add(Definitions.EXIF_IFD_POINTER_TAG, exifIfdPointerEntry);
 
-            if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
+            if (MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
             {
-                exif.PrimaryIfd.Entries.Remove(Definitions.GPS_IFD_POINTER_TAG);
+                MetaData.PrimaryIfd.Entries.Remove(Definitions.GPS_IFD_POINTER_TAG);
             }
 
             var gpsIfdPointerEntry = new Entry()
@@ -124,24 +124,24 @@ namespace NtImageProcessor.MetaData.Composer
                 Count = 1,
             };
             gpsIfdPointerEntry.IntValues = new UInt32[] { (UInt32)gpsIfdPointer };
-            exif.PrimaryIfd.Entries.Add(Definitions.GPS_IFD_POINTER_TAG, gpsIfdPointerEntry);
+            MetaData.PrimaryIfd.Entries.Add(Definitions.GPS_IFD_POINTER_TAG, gpsIfdPointerEntry);
 
             var nextIfdPointer = 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length;
-            exif.PrimaryIfd.NextIfdPointer = (UInt32)nextIfdPointer;
+            MetaData.PrimaryIfd.NextIfdPointer = (UInt32)nextIfdPointer;
 
             // finally, create byte array again
-            primaryIfd = IfdComposer.ComposeIfdsection(exif.PrimaryIfd);
+            primaryIfd = IfdComposer.ComposeIfdsection(MetaData.PrimaryIfd);
 
-            exif.ExifIfd.Offset = 8 + (UInt32)primaryIfd.Length;
-            if (exif.ExifIfd != null)
+            MetaData.ExifIfd.Offset = 8 + (UInt32)primaryIfd.Length;
+            if (MetaData.ExifIfd != null)
             {
-                exifIfd = IfdComposer.ComposeIfdsection(exif.ExifIfd);
+                exifIfd = IfdComposer.ComposeIfdsection(MetaData.ExifIfd);
             }
 
-            exif.GpsIfd.Offset = 8 + (UInt32)primaryIfd.Length + (UInt32)exifIfd.Length;
-            if (exif.GpsIfd != null)
+            MetaData.GpsIfd.Offset = 8 + (UInt32)primaryIfd.Length + (UInt32)exifIfd.Length;
+            if (MetaData.GpsIfd != null)
             {
-                gpsIfd = IfdComposer.ComposeIfdsection(exif.GpsIfd);
+                gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd);
             }
             
             // 1st IFD data (after primary IFD data) should be kept
@@ -176,27 +176,12 @@ namespace NtImageProcessor.MetaData.Composer
             // At last, copy body from original image.
             Array.Copy(OriginalImage, 2 + 2 + 2 + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - (int)OriginalApp1DataSize);
 
-            DumpFirst16byte(OriginalImage);
-            DumpFirst16byte(OriginalApp1Data);
-            DumpFirst16byte(NewApp1Data);
-            DumpFirst16byte(NewImage);
+            Debug.WriteLine("Primary: ");
+            Util.DumpByteArrayAll(primaryIfd);
+            Debug.WriteLine("New image: ");
+            Util.DumpByteArrayAll(NewImage);
 
             return NewImage;
-        }
-
-        private static void DumpFirst16byte(byte[] data)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 16; i++)
-            {
-                if (i > (data.Length - 1))
-                {
-                    break;
-                }
-                sb.Append(data[i].ToString("X2"));
-                sb.Append(" ");
-            }
-            Debug.WriteLine(sb.ToString());
         }
     }
 }

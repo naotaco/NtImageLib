@@ -84,7 +84,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Histogram\HistogramCreator.cs" />
-    <Compile Include="MetaData\Composer\ExifProcessor.cs" />
+    <Compile Include="MetaData\Composer\JpegMetaDataProcessor.cs" />
     <Compile Include="MetaData\Composer\IfdComposer.cs" />
     <Compile Include="MetaData\Misc\Definitions.cs" />
     <Compile Include="MetaData\Misc\GpsIfdDataCreator.cs" />
@@ -92,7 +92,7 @@
     <Compile Include="MetaData\Misc\InvalidTypeException.cs" />
     <Compile Include="MetaData\Misc\UnsupportedFileFormatException.cs" />
     <Compile Include="MetaData\Misc\Util.cs" />
-    <Compile Include="MetaData\Parser\ExifParser.cs" />
+    <Compile Include="MetaData\Parser\JpegMetaDataParser.cs" />
     <Compile Include="MetaData\MetaDataOperator.cs" />
     <Compile Include="MetaData\Parser\IfdParser.cs" />
     <Compile Include="MetaData\Structure\Entry.cs" />

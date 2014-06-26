@@ -53,6 +53,9 @@ namespace NtImageProcessor.MetaData.Composer
             Array.Copy(ifdPointerValue, 0, ComposedData, 2 + 12 * (int)count, 4);
             // TIFF header, number of entry, each entries, Nexf IFD pointer.
             var ExtraDataSectionOffset = (UInt32)(2 + 12 * (int)count + 4);
+            Debug.WriteLine("ExtraDataSectionOffset: " + ExtraDataSectionOffset.ToString("X"));
+
+            Debug.WriteLine("ifd.offset: " + ifd.Offset.ToString("X"));
 
             var keys = data.Keys.ToArray<UInt32>();
             Array.Sort(keys);
@@ -64,6 +67,7 @@ namespace NtImageProcessor.MetaData.Composer
                 var tag = Util.ConvertToByte(data[key].Tag, 2);
                 Array.Copy(tag, 0, ComposedData, pointer, 2);
                 pointer += 2;
+                Debug.WriteLine("Tag: " + data[key].Tag.ToString("X"));
 
                 // type
                 var type = Util.ConvertToByte(Util.ConvertFromEntryType(data[key].Type), 2);
@@ -88,7 +92,10 @@ namespace NtImageProcessor.MetaData.Composer
                     // store pointer for extra area. Origin of pointer should be position of TIFF header.
                     var offset = Util.ConvertToByte(ExtraDataSectionOffset + ifd.Offset, 4);
                     Array.Copy(offset, 0, ComposedData, pointer, 4);
-
+                    Debug.WriteLine("Pointer: " + pointer.ToString("X"));
+                    Debug.WriteLine("Offset: " + (ExtraDataSectionOffset + ifd.Offset).ToString("X"));
+                    Util.DumpFirst16byte(offset);
+                    Util.DumpByteArray(ComposedData, pointer, 4);
 
                     ExtraDataSectionOffset += (UInt32)data[key].value.Length;
 
@@ -97,7 +104,7 @@ namespace NtImageProcessor.MetaData.Composer
 
             }
             Debug.WriteLine("ExtraSectionOffset: " + ExtraDataSectionOffset + " data length: " + ComposedData.Length);
-
+            Util.DumpByteArrayAll(ComposedData);
             return ComposedData;
         }
     }
