@@ -150,14 +150,26 @@ namespace NtImageProcessor.MetaData.Composer
 
             // Build App1 section. From "Exif\0\0" to end of thumbnail data (1st IFD)
             // Exif00 + TIFF header + 3 IFD sections (Primary, Exif, GPS) + 1st IFD data from original data
-            var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length + Original1stIfdData.Length];
+            // var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length + Original1stIfdData.Length];
+            var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length];
             Debug.WriteLine("New App1 size: " + NewApp1Data.Length.ToString("X"));
 
-            Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6 + 8);
+            // Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6 + 8);
+            Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6); // only EXIF00 should be copiec.
+
+            var endian = Util.ConvertToByte(0x4d4d, 2, false);
+            Array.Copy(endian, 0, NewApp1Data, 6, 2);
+
+            var magicNumber = Util.ConvertToByte(0x002A, 2, false);
+            Array.Copy(magicNumber, 0, NewApp1Data, 8, 2);
+
+            var primaryIfdOffset = Util.ConvertToByte(8, 4, false);
+            Array.Copy(primaryIfdOffset, 0, NewApp1Data, 10, 4);
+            
             Array.Copy(primaryIfd, 0, NewApp1Data, 6 + 8, primaryIfd.Length);
             Array.Copy(exifIfd, 0, NewApp1Data, 6 + 8 + primaryIfd.Length, exifIfd.Length);
             Array.Copy(gpsIfd, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length, gpsIfd.Length);
-            Array.Copy(Original1stIfdData, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length, Original1stIfdData.Length);
+            // Array.Copy(Original1stIfdData, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length, Original1stIfdData.Length);
 
             // Only size of App1 data is different.
             var NewImage = new byte[OriginalImage.Length - OriginalApp1DataSize + NewApp1Data.Length];
@@ -175,6 +187,8 @@ namespace NtImageProcessor.MetaData.Composer
 
             // At last, copy body from original image.
             Array.Copy(OriginalImage, 2 + 2 + 2 + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - (int)OriginalApp1DataSize);
+
+            Util.DumpByteArray(NewImage,0,  256);
 
             return NewImage;
         }

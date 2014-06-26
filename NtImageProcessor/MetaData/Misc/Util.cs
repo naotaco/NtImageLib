@@ -40,12 +40,7 @@ namespace NtImageProcessor.MetaData.Misc
             return value;
         }
 
-        public static byte[] ConvertToByte(UInt32 value, int length)
-        {
-            return ConvertToByte(value, length, true);
-        }
-
-        public static byte[] ConvertToByte(UInt32 value, int length, bool IsLittleEndian)
+        public static byte[] ConvertToByte(UInt32 value, int length, bool IsLittleEndian = true)
         {
             if (length > 4)
             {
@@ -87,11 +82,11 @@ namespace NtImageProcessor.MetaData.Misc
             return fraction;
         }
 
-        public static byte[] ConvertToByte(UnsignedFraction value)
+        public static byte[] ConvertToByte(UnsignedFraction value, bool IsLittleEndian = true)
         {
             var ret = new byte[8];
-            Array.Copy(Util.ConvertToByte(value.Numerator, 4), 0, ret, 0, 4);
-            Array.Copy(Util.ConvertToByte(value.Denominator, 4), 0, ret, 4, 4);
+            Array.Copy(Util.ConvertToByte(value.Numerator, 4, IsLittleEndian), 0, ret, 0, 4);
+            Array.Copy(Util.ConvertToByte(value.Denominator, 4, IsLittleEndian), 0, ret, 4, 4);
             return ret;
         }
 
@@ -201,6 +196,10 @@ namespace NtImageProcessor.MetaData.Misc
                 }
                 sb.Append(array[i].ToString("X2"));
                 sb.Append(" ");
+                if (i % 16 == 15)
+                {
+                    sb.Append(Environment.NewLine);
+                }
             }
             Debug.WriteLine(sb.ToString());
         }

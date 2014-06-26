@@ -8,6 +8,12 @@ namespace NtImageProcessor.MetaData.Misc
 {
     public static class Definitions
     {
+        public enum Endian
+        {
+            Little,
+            Big,
+        };
+
         public const UInt32 JPEG_SOI_MARKER = 0xFFD8;
         public const UInt32 APP1_MARKER = 0xFFE1;
         public const UInt32 APP1_OFFSET = 0x0C;

@@ -8,11 +8,7 @@ namespace NtImageProcessor.MetaData.Structure
 {
     public class JpegMetaData
     {
-        public enum Endian
-        {
-            Little,
-            Big,
-        };
+
 
         /// <summary>
         /// Address of TIFF header.

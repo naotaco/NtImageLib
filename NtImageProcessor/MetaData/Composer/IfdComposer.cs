@@ -42,11 +42,11 @@ namespace NtImageProcessor.MetaData.Composer
             var ComposedData = new byte[TotalSize];
 
             // set data of entry num.
-            var EntryNum = Util.ConvertToByte(count, 2);
+            var EntryNum = Util.ConvertToByte(count, 2, false);
             Array.Copy(EntryNum, ComposedData, EntryNum.Length);
 
             // set Next IFD pointer
-            var  ifdPointerValue = Util.ConvertToByte(ifd.NextIfdPointer, 4, true);
+            var  ifdPointerValue = Util.ConvertToByte(ifd.NextIfdPointer, 4, false);
             
             Debug.WriteLine("Nexf IFD: " + ifd.NextIfdPointer.ToString("X")); 
 
@@ -64,18 +64,18 @@ namespace NtImageProcessor.MetaData.Composer
             foreach (UInt32 key in keys)
             {
                 // tag in 2 bytes.
-                var tag = Util.ConvertToByte(data[key].Tag, 2);
+                var tag = Util.ConvertToByte(data[key].Tag, 2, false);
                 Array.Copy(tag, 0, ComposedData, pointer, 2);
                 pointer += 2;
                 Debug.WriteLine("Tag: " + data[key].Tag.ToString("X"));
 
                 // type
-                var type = Util.ConvertToByte(Util.ConvertFromEntryType(data[key].Type), 2);
+                var type = Util.ConvertToByte(Util.ConvertFromEntryType(data[key].Type), 2, false);
                 Array.Copy(type, 0, ComposedData, pointer, 2);
                 pointer += 2;
 
                 // count
-                var c = Util.ConvertToByte(data[key].Count, 4);
+                var c = Util.ConvertToByte(data[key].Count, 4, false);
                 Array.Copy(c, 0, ComposedData, pointer, 4);
                 pointer += 4;
 
@@ -90,7 +90,7 @@ namespace NtImageProcessor.MetaData.Composer
                     Array.Copy(data[key].value, 0, ComposedData, (int)ExtraDataSectionOffset, data[key].value.Length);
 
                     // store pointer for extra area. Origin of pointer should be position of TIFF header.
-                    var offset = Util.ConvertToByte(ExtraDataSectionOffset + ifd.Offset, 4);
+                    var offset = Util.ConvertToByte(ExtraDataSectionOffset + ifd.Offset, 4, false);
                     Array.Copy(offset, 0, ComposedData, pointer, 4);
                     Debug.WriteLine("Pointer: " + pointer.ToString("X"));
                     Debug.WriteLine("Offset: " + (ExtraDataSectionOffset + ifd.Offset).ToString("X"));
