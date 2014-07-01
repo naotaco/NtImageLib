@@ -22,24 +22,26 @@ namespace NtImageProcessor.MetaData.Composer
         {
             var OriginalMetaData = JpegMetaDataParser.ParseImage(OriginalImage);
             Debug.WriteLine("Original image size: " + OriginalImage.Length.ToString("X"));
+
+            var endian = Definitions.Endian.Big;
             
             // All data after this pointer will be kept.
             var FirstIfdPointer = MetaData.PrimaryIfd.NextIfdPointer;
 
             // check SOI, Start of image marker.
-            if (Util.GetUIntValue(OriginalImage, 0, 2, false) != Definitions.JPEG_SOI_MARKER)
+            if (Util.GetUIntValue(OriginalImage, 0, 2, endian) != Definitions.JPEG_SOI_MARKER)
             {
-                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(OriginalImage, 0, 2, false));
+                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(OriginalImage, 0, 2, endian));
             }
 
             // check APP1 maerker
-            if (Util.GetUIntValue(OriginalImage, 2, 2, false) != Definitions.APP1_MARKER)
+            if (Util.GetUIntValue(OriginalImage, 2, 2, endian) != Definitions.APP1_MARKER)
             {
-                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(OriginalImage, 2, 2, false));
+                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(OriginalImage, 2, 2, endian));
             }
 
             // Note: App1 size and ID are fixed to Big endian.
-            UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4, 2, false);
+            UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4, 2, endian);
             Debug.WriteLine("Original App1 size: " + OriginalApp1DataSize.ToString("X"));
 
             // 0-5 byte: Exif identify code. E, x, i, f, \0, \0
@@ -157,13 +159,13 @@ namespace NtImageProcessor.MetaData.Composer
             // Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6 + 8);
             Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6); // only EXIF00 should be copiec.
 
-            var endian = Util.ConvertToByte(0x4d4d, 2, false);
-            Array.Copy(endian, 0, NewApp1Data, 6, 2);
+            var endianSection = Util.ConvertToByte(0x4d4d, 2, endian);
+            Array.Copy(endianSection, 0, NewApp1Data, 6, 2);
 
-            var magicNumber = Util.ConvertToByte(0x002A, 2, false);
+            var magicNumber = Util.ConvertToByte(0x002A, 2, endian);
             Array.Copy(magicNumber, 0, NewApp1Data, 8, 2);
 
-            var primaryIfdOffset = Util.ConvertToByte(8, 4, false);
+            var primaryIfdOffset = Util.ConvertToByte(8, 4, endian);
             Array.Copy(primaryIfdOffset, 0, NewApp1Data, 10, 4);
             
             Array.Copy(primaryIfd, 0, NewApp1Data, 6 + 8, primaryIfd.Length);
@@ -179,7 +181,7 @@ namespace NtImageProcessor.MetaData.Composer
             Array.Copy(OriginalImage, 0, NewImage, 0, 2 + 2);
 
             // Important note again: App 1 data size is stored in Big endian.
-            var App1SizeData = Util.ConvertToByte((UInt32)NewApp1Data.Length, 2, false);
+            var App1SizeData = Util.ConvertToByte((UInt32)NewApp1Data.Length, 2, endian);
             Array.Copy(App1SizeData, 0, NewImage, 4, 2);
 
             // After that, copy App1 data to new image.

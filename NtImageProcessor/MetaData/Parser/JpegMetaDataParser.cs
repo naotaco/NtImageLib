@@ -17,19 +17,21 @@ namespace NtImageProcessor.MetaData
 
             var exif = new JpegMetaData();
 
+            var endian = Definitions.Endian.Big;
+
             // check SOI, Start of image marker.
-            if (Util.GetUIntValue(image, 0, 2, false) != Definitions.JPEG_SOI_MARKER)
+            if (Util.GetUIntValue(image, 0, 2, endian) != Definitions.JPEG_SOI_MARKER)
             {
-                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(image, 0, 2, false));
+                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(image, 0, 2, endian));
             }
 
             // check APP1 maerker
-            if (Util.GetUIntValue(image, 2, 2, false) != Definitions.APP1_MARKER)
+            if (Util.GetUIntValue(image, 2, 2, endian) != Definitions.APP1_MARKER)
             {
-                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(image, 2, 2, false));
+                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(image, 2, 2, endian));
             }
 
-            UInt32 App1Size = Util.GetUIntValue(image, 4, 2, false);
+            UInt32 App1Size = Util.GetUIntValue(image, 4, 2, endian);
             Debug.WriteLine("App1 size: " + App1Size.ToString("X"));
 
             var exifHeader = Encoding.UTF8.GetString(image, 6, 4);

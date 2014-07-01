@@ -5,20 +5,16 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NtImageProcessor.MetaData.Structure;
 
 namespace NtImageProcessor.MetaData.Misc
 {
     public static class Util
     {
-        public static UInt32 GetUIntValue(byte[] data, int address, int length)
-        {
-            return GetUIntValue(data, address, length, true);
-        }
-
-        public static UInt32 GetUIntValue(byte[] data, int address, int length, bool IsLittleEndian)
+        public static UInt32 GetUIntValue(byte[] data, int address, int length, Definitions.Endian endian = Definitions.Endian.Little)
         {
             // if bigger than 4 bytes, can't set to int type.
-            if (length > 4)
+            if (length > 4 || length <= 0)
             {
                 throw new InvalidCastException("Uint32 type can't store more than 4 bytes");
             }
@@ -27,7 +23,7 @@ namespace NtImageProcessor.MetaData.Misc
             for (int i = 0; i < length; i++)
             {
                 // Debug.WriteLine(data[address + i].ToString("X"));
-                if (IsLittleEndian)
+                if (endian == Definitions.Endian.Little)
                 {
                     value += (UInt32)data[address + i] << (i * 8);
                 }
@@ -40,14 +36,14 @@ namespace NtImageProcessor.MetaData.Misc
             return value;
         }
 
-        public static byte[] ConvertToByte(UInt32 value, int length, bool IsLittleEndian = true)
+        public static byte[] ConvertToByte(UInt32 value, int length, Definitions.Endian endian = Definitions.Endian.Little)
         {
-            if (length > 4)
+            if (length > 4 || length <= 0)
             {
                 throw new InvalidCastException();
             }
             var ret = new byte[length];
-            if (IsLittleEndian)
+            if (endian == Definitions.Endian.Little)
             {
                 for (int i = 0; i < length; i++)
                 {
@@ -82,11 +78,11 @@ namespace NtImageProcessor.MetaData.Misc
             return fraction;
         }
 
-        public static byte[] ConvertToByte(UnsignedFraction value, bool IsLittleEndian = true)
+        public static byte[] ConvertToByte(UnsignedFraction value, Definitions.Endian endian = Definitions.Endian.Little)
         {
             var ret = new byte[8];
-            Array.Copy(Util.ConvertToByte(value.Numerator, 4, IsLittleEndian), 0, ret, 0, 4);
-            Array.Copy(Util.ConvertToByte(value.Denominator, 4, IsLittleEndian), 0, ret, 4, 4);
+            Array.Copy(Util.ConvertToByte(value.Numerator, 4, endian), 0, ret, 0, 4);
+            Array.Copy(Util.ConvertToByte(value.Denominator, 4, endian), 0, ret, 4, 4);
             return ret;
         }
 
@@ -104,12 +100,7 @@ namespace NtImageProcessor.MetaData.Misc
             return ret;
         }
 
-        public static Int32 GetSIntValue(byte[] data, int address, int length)
-        {
-            return GetSIntValue(data, address, length, true);
-        }
-        
-        public static Int32 GetSIntValue(byte[] data, int address, int length, bool IsLittleEndian)
+        public static Int32 GetSIntValue(byte[] data, int address, int length, Definitions.Endian endian = Definitions.Endian.Little)
         {
             // if bigger than 4 bytes, can't set to int type.
             if (length > 4)
@@ -121,7 +112,7 @@ namespace NtImageProcessor.MetaData.Misc
             for (int i = 0; i < length; i++)
             {
                 // Debug.WriteLine(data[address + i].ToString("X"));
-                if (IsLittleEndian)
+                if (endian == Definitions.Endian.Little)
                 {
                     value += (Int32)data[address + i] << (i * 8);
                 }

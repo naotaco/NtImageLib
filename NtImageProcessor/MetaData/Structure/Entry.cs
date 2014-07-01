@@ -15,7 +15,7 @@ namespace NtImageProcessor.MetaData.Structure
         public const int COUNT_LEN = 4;
         public const int OFFSET_LEN = 4;
 
-        private bool IsLittleEndian = false;
+        Definitions.Endian endian = Definitions.Endian.Big;
 
         /// <summary>
         /// 
@@ -105,7 +105,7 @@ namespace NtImageProcessor.MetaData.Structure
                 for (int i = 0; i < value.Length; i++)
                 {
                     Debug.WriteLine("value: " + value[i]);
-                    var v = Util.ConvertToByte(value[i], Util.ConvertToDataSize(this.Type), IsLittleEndian);
+                    var v = Util.ConvertToByte(value[i], Util.ConvertToDataSize(this.Type), endian);
                     Array.Copy(v, 0, newValue, i * Util.ConvertToDataSize(this.Type), v.Length);
                 }
                 this.value = newValue;
@@ -180,7 +180,7 @@ namespace NtImageProcessor.MetaData.Structure
                 for (int i = 0; i < value.Length; i++)
                 {
                     var f = Util.ConvertoToUnsignedFraction(value[i]);
-                    var v = Util.ConvertToByte(f, IsLittleEndian);
+                    var v = Util.ConvertToByte(f, endian);
                     Debug.WriteLine("val " + value[i] + " " + f.Numerator + "/" + f.Denominator);
                     Array.Copy(v, 0, newValue, i * 8, 8);
                 }

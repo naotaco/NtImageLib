@@ -86,7 +86,7 @@
     <Compile Include="Histogram\HistogramCreator.cs" />
     <Compile Include="MetaData\Composer\JpegMetaDataProcessor.cs" />
     <Compile Include="MetaData\Composer\IfdComposer.cs" />
-    <Compile Include="MetaData\Misc\Definitions.cs" />
+    <Compile Include="MetaData\Structure\Definitions.cs" />
     <Compile Include="MetaData\Misc\GpsIfdDataCreator.cs" />
     <Compile Include="MetaData\Misc\GpsInformationAlreadyExistsException.cs" />
     <Compile Include="MetaData\Misc\InvalidTypeException.cs" />
