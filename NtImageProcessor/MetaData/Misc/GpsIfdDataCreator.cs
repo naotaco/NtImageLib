@@ -99,7 +99,7 @@ namespace NtImageProcessor.MetaData.Misc
                 Type = Entry.EntryType.Ascii,
                 Count = 7,
             };
-            GpsMapDetum.value = Util.ConvertToByte("WGS-84");
+            GpsMapDetum.value = Util.ToByte("WGS-84");
             gpsIfdData.Entries.Add(GpsMapDetum.Tag, GpsMapDetum);
 
             var GpsDateStamp = new Entry()
@@ -109,7 +109,7 @@ namespace NtImageProcessor.MetaData.Misc
                 Count = 11,
             };
             String str = position.Coordinate.Timestamp.Year.ToString("D4") + ":" + position.Coordinate.Timestamp.Month.ToString("D2") + ":" + position.Coordinate.Timestamp.Day.ToString("D2");
-            GpsDateStamp.value = Util.ConvertToByte(str);
+            GpsDateStamp.value = Util.ToByte(str);
             gpsIfdData.Entries.Add(GpsDateStamp.Tag, GpsDateStamp);
 
             return gpsIfdData;

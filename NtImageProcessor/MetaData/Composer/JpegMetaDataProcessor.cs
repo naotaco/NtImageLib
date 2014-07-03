@@ -159,13 +159,13 @@ namespace NtImageProcessor.MetaData.Composer
             // Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6 + 8);
             Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6); // only EXIF00 should be copiec.
 
-            var endianSection = Util.ConvertToByte(0x4d4d, 2, endian);
+            var endianSection = Util.ToByte(0x4d4d, 2, endian);
             Array.Copy(endianSection, 0, NewApp1Data, 6, 2);
 
-            var magicNumber = Util.ConvertToByte(0x002A, 2, endian);
+            var magicNumber = Util.ToByte(0x002A, 2, endian);
             Array.Copy(magicNumber, 0, NewApp1Data, 8, 2);
 
-            var primaryIfdOffset = Util.ConvertToByte(8, 4, endian);
+            var primaryIfdOffset = Util.ToByte(8, 4, endian);
             Array.Copy(primaryIfdOffset, 0, NewApp1Data, 10, 4);
             
             Array.Copy(primaryIfd, 0, NewApp1Data, 6 + 8, primaryIfd.Length);
@@ -181,7 +181,7 @@ namespace NtImageProcessor.MetaData.Composer
             Array.Copy(OriginalImage, 0, NewImage, 0, 2 + 2);
 
             // Important note again: App 1 data size is stored in Big endian.
-            var App1SizeData = Util.ConvertToByte((UInt32)NewApp1Data.Length, 2, endian);
+            var App1SizeData = Util.ToByte((UInt32)NewApp1Data.Length, 2, endian);
             Array.Copy(App1SizeData, 0, NewImage, 4, 2);
 
             // After that, copy App1 data to new image.

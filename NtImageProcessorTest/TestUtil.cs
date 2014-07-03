@@ -9,12 +9,12 @@ namespace NtImageProcessorTest
 {
     public static class TestUtil
     {
-        public static void AreEqual(byte[] expected, byte[] actual)
+        public static void AreEqual(byte[] expected, byte[] actual, string message = "")
         {
-            Assert.AreEqual(expected.Length, actual.Length);
+            Assert.AreEqual(expected.Length, actual.Length, message + " at length comparison");
             for (int i = 0; i < expected.Length; i++)
             {
-                Assert.AreEqual(expected[i], actual[i]);
+                Assert.AreEqual(expected[i], actual[i], message + " at element comparison. i: " + i);
             }
         }
 

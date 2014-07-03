@@ -36,7 +36,7 @@ namespace NtImageProcessor.MetaData.Misc
             return value;
         }
 
-        public static byte[] ConvertToByte(UInt32 value, int length, Definitions.Endian endian = Definitions.Endian.Little)
+        public static byte[] ToByte(UInt32 value, int length, Definitions.Endian endian = Definitions.Endian.Little)
         {
             if (length > 4 || length <= 0)
             {
@@ -69,7 +69,7 @@ namespace NtImageProcessor.MetaData.Misc
             return ret;
         }
 
-        public static UnsignedFraction ConvertoToUnsignedFraction(double value)
+        public static UnsignedFraction ToUnsignedFraction(double value)
         {
             var fraction = new UnsignedFraction();
             UInt32 denominator = 1;
@@ -84,15 +84,15 @@ namespace NtImageProcessor.MetaData.Misc
             return fraction;
         }
 
-        public static byte[] ConvertToByte(UnsignedFraction value, Definitions.Endian endian = Definitions.Endian.Little)
+        public static byte[] ToByte(UnsignedFraction value, Definitions.Endian endian = Definitions.Endian.Little)
         {
             var ret = new byte[8];
-            Array.Copy(Util.ConvertToByte(value.Numerator, 4, endian), 0, ret, 0, 4);
-            Array.Copy(Util.ConvertToByte(value.Denominator, 4, endian), 0, ret, 4, 4);
+            Array.Copy(Util.ToByte(value.Numerator, 4, endian), 0, ret, 0, 4);
+            Array.Copy(Util.ToByte(value.Denominator, 4, endian), 0, ret, 4, 4);
             return ret;
         }
 
-        public static byte[] ConvertToByte(string str)
+        public static byte[] ToByte(string str)
         {
             var ret = new byte[str.Length + 1];
             int i = 0;
@@ -139,7 +139,7 @@ namespace NtImageProcessor.MetaData.Misc
                                 System.Math.Floor(dValue * dCoef) / dCoef;
         }
 
-        public static int ConvertToDataSize(NtImageProcessor.MetaData.Structure.Entry.EntryType t)
+        public static int FindDataSize(NtImageProcessor.MetaData.Structure.Entry.EntryType t)
         {
             int valueSize = 0;
             switch (t)
@@ -216,7 +216,7 @@ namespace NtImageProcessor.MetaData.Misc
             Debug.WriteLine(sb.ToString());
         }
 
-        public static Entry.EntryType ConvertToEntryType(UInt32 value)
+        public static Entry.EntryType ToEntryType(UInt32 value)
         {
             switch (value)
             {
@@ -243,7 +243,7 @@ namespace NtImageProcessor.MetaData.Misc
             }
         }
 
-        public static UInt32 ConvertFromEntryType(Entry.EntryType value)
+        public static UInt32 ToUInt32(Entry.EntryType value)
         {
             switch (value)
             {

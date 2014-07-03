@@ -46,7 +46,7 @@ namespace NtImageProcessor.MetaData.Parser
 
                 // type
                 var typeValue = Util.GetUIntValue(App1Data, EntryOrigin + 2, 2);
-                entry.Type = Util.ConvertToEntryType(typeValue);
+                entry.Type = Util.ToEntryType(typeValue);
                 // Debug.WriteLine("Type: " + entry.Type.ToString());
 
                 // count
@@ -54,7 +54,7 @@ namespace NtImageProcessor.MetaData.Parser
                 // Debug.WriteLine("Count: " + entry.Count);
 
                 var valueSize = 0;
-                valueSize = Util.ConvertToDataSize(entry.Type);
+                valueSize = Util.FindDataSize(entry.Type);
                 var TotalValueSize = valueSize * (int)entry.Count;
                 // Debug.WriteLine("Total value size: " + TotalValueSize);
 

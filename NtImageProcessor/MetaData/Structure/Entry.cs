@@ -92,7 +92,7 @@ namespace NtImageProcessor.MetaData.Structure
             get
             {
                 var v = new UInt32[this.Count];
-                var len = Util.ConvertToDataSize(this.Type);
+                var len = Util.FindDataSize(this.Type);
                 for (int i = 0; i < Count; i++)
                 {
                     v[i] = Util.GetUIntValue(value, i * len, len);
@@ -101,12 +101,12 @@ namespace NtImageProcessor.MetaData.Structure
             }
             set
             {
-                var newValue = new byte[value.Length * Util.ConvertToDataSize(this.Type)];
+                var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
                 for (int i = 0; i < value.Length; i++)
                 {
                     Debug.WriteLine("value: " + value[i]);
-                    var v = Util.ConvertToByte(value[i], Util.ConvertToDataSize(this.Type), endian);
-                    Array.Copy(v, 0, newValue, i * Util.ConvertToDataSize(this.Type), v.Length);
+                    var v = Util.ToByte(value[i], Util.FindDataSize(this.Type), endian);
+                    Array.Copy(v, 0, newValue, i * Util.FindDataSize(this.Type), v.Length);
                 }
                 this.value = newValue;
             }
@@ -120,7 +120,7 @@ namespace NtImageProcessor.MetaData.Structure
             get
             {
                 var v = new UnsignedFraction[Count];
-                var len = Util.ConvertToDataSize(this.Type);
+                var len = Util.FindDataSize(this.Type);
                 for (int i = 0; i < Count; i++)
                 {
                     //v[i] = Util.GetUIntValue(value, i * len, len); 
@@ -138,7 +138,7 @@ namespace NtImageProcessor.MetaData.Structure
             get
             {
                 var v = new SignedFraction[Count];
-                var len = Util.ConvertToDataSize(this.Type);
+                var len = Util.FindDataSize(this.Type);
                 for (int i = 0; i < Count; i++)
                 {
                     //v[i] = Util.GetUIntValue(value, i * len, len); 
@@ -157,7 +157,7 @@ namespace NtImageProcessor.MetaData.Structure
             {
 
                 var v = new double[Count];
-                var len = Util.ConvertToDataSize(this.Type);
+                var len = Util.FindDataSize(this.Type);
                 for (int i = 0; i < Count; i++)
                 {
                     double val = 0;
@@ -179,8 +179,8 @@ namespace NtImageProcessor.MetaData.Structure
                 var newValue = new byte[value.Length * 8];
                 for (int i = 0; i < value.Length; i++)
                 {
-                    var f = Util.ConvertoToUnsignedFraction(value[i]);
-                    var v = Util.ConvertToByte(f, endian);
+                    var f = Util.ToUnsignedFraction(value[i]);
+                    var v = Util.ToByte(f, endian);
                     Debug.WriteLine("val " + value[i] + " " + f.Numerator + "/" + f.Denominator);
                     Array.Copy(v, 0, newValue, i * 8, 8);
                 }
