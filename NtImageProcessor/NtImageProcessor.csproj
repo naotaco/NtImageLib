@@ -89,8 +89,7 @@
     <Compile Include="MetaData\Structure\Definitions.cs" />
     <Compile Include="MetaData\Misc\GpsIfdDataCreator.cs" />
     <Compile Include="MetaData\Misc\GpsInformationAlreadyExistsException.cs" />
-    <Compile Include="MetaData\Misc\InvalidTypeException.cs" />
-    <Compile Include="MetaData\Misc\UnsupportedFileFormatException.cs" />
+    <Compile Include="MetaData\Misc\Exceptions.cs" />
     <Compile Include="MetaData\Misc\Util.cs" />
     <Compile Include="MetaData\Parser\JpegMetaDataParser.cs" />
     <Compile Include="MetaData\MetaDataOperator.cs" />

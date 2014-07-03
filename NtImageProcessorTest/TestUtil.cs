@@ -17,5 +17,19 @@ namespace NtImageProcessorTest
                 Assert.AreEqual(expected[i], actual[i]);
             }
         }
+
+        public static byte[] GetLastElements(byte[] array, int newLength)
+        {
+            var newArray = new byte[newLength];
+            Array.Copy(array, array.Length - newLength, newArray, 0, newLength);
+            return newArray;
+        }
+
+        public static byte[] GetFirstElements(byte[] array, int newLength)
+        {
+            var newArray = new byte[newLength];
+            Array.Copy(array, newArray, newLength);
+            return newArray;
+        }
     }
 }

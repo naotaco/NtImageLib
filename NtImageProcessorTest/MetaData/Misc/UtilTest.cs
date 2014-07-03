@@ -31,46 +31,41 @@ namespace NtImageProcessorTest.MetaData.Misc
             {
                 for (int length = 0; length < 6; length++)
                 {
-                    if (length == 1 || length == 2 || length == 3)
+                    if (length == 0 || length == 5)
                     {
-                        // todo.
+                        // Invalid length.
+                        Assert.ThrowsException<InvalidCastException>(() =>
+                        {
+                            var e = IntByteData[key];
+                            var a = Util.ConvertToByte(key, length, Definitions.Endian.Big);
+                        });
                         continue;
                     }
 
-                    if (length == 0 || length == 5)
+                    UInt64 maxNum = (UInt64)Math.Pow(2, (length * 8));
+                    if (key >= maxNum)
                     {
-                        // Invalid length.
-                        Assert.ThrowsException<InvalidCastException>(() =>
+                        Assert.ThrowsException<OverflowException>(() =>
                         {
-                            var expected_big = IntByteData[key];
-                            var actual_big = Util.ConvertToByte(key, length, Definitions.Endian.Big);
+                            var a = Util.ConvertToByte(key, length, Definitions.Endian.Big);
+                            a = Util.ConvertToByte(key, length, Definitions.Endian.Little);
                         });
-                    }
-                    else
-                    {
-                        var expected_big = IntByteData[key];
-                        var actual_big = Util.ConvertToByte(key, length, Definitions.Endian.Big);
-                        TestUtil.AreEqual(expected_big, actual_big);
+                        Assert.ThrowsException<OverflowException>(() =>
+                        {
+                            var a = Util.ConvertToByte(key, length, Definitions.Endian.Little);
+                        });
+                        continue;
                     }
 
-                    if (length == 0 || length == 5)
-                    {                        
-                        // Invalid length.
-                        Assert.ThrowsException<InvalidCastException>(() =>
-                        {
-                            var expected_Little = IntByteData[key];
-                            var actual_little = Util.ConvertToByte(key, length, Definitions.Endian.Little);
+                    var expected_big = TestUtil.GetLastElements(IntByteData[key], length);
+                    var actual_big = Util.ConvertToByte(key, length, Definitions.Endian.Big);
+                    TestUtil.AreEqual(expected_big, actual_big);
 
-                        });
-                    }
-                    else
-                    {
-                        var expected_Little = new byte[length];
-                        IntByteData[key].CopyTo(expected_Little, 0);
-                        Array.Reverse(expected_Little);
-                        var actual_little = Util.ConvertToByte(key, length, Definitions.Endian.Little);
-                        TestUtil.AreEqual(expected_Little, actual_little);
-                    }
+                    var expected_Little = TestUtil.GetLastElements(IntByteData[key], length);
+                    Array.Reverse(expected_Little);                    
+                    var actual_little = Util.ConvertToByte(key, length, Definitions.Endian.Little);
+                    TestUtil.AreEqual(expected_Little, actual_little);
+
                 }
             }
         }

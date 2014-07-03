@@ -60,6 +60,12 @@ namespace NtImageProcessor.MetaData.Misc
                     // Debug.WriteLine("byte: " + ret[i].ToString("X"));
                 }
             }
+            // after conversion, remaining value must be 0.
+            if (value > 0)
+            {
+                throw new OverflowException();
+            }
+
             return ret;
         }
 
