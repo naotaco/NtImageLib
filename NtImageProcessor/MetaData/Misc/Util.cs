@@ -93,16 +93,42 @@ namespace NtImageProcessor.MetaData.Misc
                 // set the highest bit
                 if (endian == Definitions.Endian.Little)
                 {
+                    if ((ByteValue[ByteValue.Length - 1] & 0x80) == 0x80)
+                    {
+                        // if the highest bit is already set, it means overflow.
+                        throw new OverflowException();
+                    }
                     ByteValue[ByteValue.Length - 1] |= 0x80;
                 }
                 else
                 {
+                    if ((ByteValue[0] & 0x80) == 0x80)
+                    {
+                        // if the highest bit is already set, it means overflow.
+                        throw new OverflowException();
+                    }
                     ByteValue[0] |= 0x80;
                 }
             }
             else
             {
                 ByteValue = ToByte((UInt32)value, length, endian);
+                if (endian == Definitions.Endian.Little)
+                {
+                    if ((ByteValue[ByteValue.Length - 1] & 0x80) == 0x80)
+                    {
+                        // if the highest bit is already set, it means overflow.
+                        throw new OverflowException();
+                    }
+                }
+                else
+                {
+                    if ((ByteValue[0] & 0x80) == 0x80)
+                    {
+                        // if the highest bit is already set, it means overflow.
+                        throw new OverflowException();
+                    }
+                }
             }
 
             return ByteValue;

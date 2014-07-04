@@ -25,7 +25,7 @@ namespace NtImageProcessorTest.MetaData.Misc
         };
 
         [TestMethod]
-        public void IntToByte()
+        public void UIntToByte()
         {
             foreach (UInt32 key in IntByteData.Keys)
             {
@@ -82,11 +82,11 @@ namespace NtImageProcessorTest.MetaData.Misc
         };
 
         [TestMethod]
-        public void ByteToInt_ShortArray()
+        public void ByteToUInt_ShortArray()
         {
             // upto 4 bytes array
             foreach (UInt32 key in IntByteData2.Keys)
-            {      
+            {
                 var Array_Big = new byte[IntByteData2[key].Length];
                 IntByteData2[key].CopyTo(Array_Big, 0);
                 var Array_Little = new byte[IntByteData2[key].Length];
@@ -128,6 +128,101 @@ namespace NtImageProcessorTest.MetaData.Misc
                     {
                         var a = Util.GetUIntValue(Array_Little, 0, Array_Little.Length + 1, Definitions.Endian.Little);
                     }, "IIndexOutOfRangeException in Little endian. key: " + key);
+                }
+            }
+        }
+
+        public static Dictionary<Int32, byte[]> IntByteData3 = new Dictionary<Int32, byte[]>()
+        {
+            // expected array is in Big endian.
+            { 0, new byte[]{0,0,0,0}},
+            { 1, new byte[]{0,0,0,1}},
+            { 0xFF, new byte[]{0,0,0,0xFF}},
+            { 0x1FF, new byte[]{0,0,1,0xFF}},
+            { 0xFFFF, new byte[]{0,0,0xFF, 0xff}},
+            { 0x7FFFFFFF, new byte[]{0x7F,0xff, 0xff, 0xff}},
+            { -1, new byte[]{0x0, 0,0,1}},
+            { -0xFFFF, new byte[]{0x0, 0, 0xFF, 0xFF}},
+            { -0x7FFFFFFF, new byte[]{0x7F, 0xFF, 0xFF, 0xFF}},
+        };
+
+        [TestMethod]
+        public void IntToByte_Exception()
+        {
+            foreach (Int32 key in IntByteData3.Keys)
+            {
+                for (int length = 0; length < 6; length++)
+                {
+                    if (length == 0 || length == 5)
+                    {
+                        // Invalid length.
+                        Assert.ThrowsException<InvalidCastException>(() =>
+                        {
+                            var e = IntByteData3[key];
+                            var a = Util.ToByte(key, length, Definitions.Endian.Big);
+                        }, "");
+                        continue;
+                    }
+
+                    Int64 maxNum = (Int64)(Math.Pow(2, (length * 8)) / 2 - 1);
+                    if (key > maxNum)
+                    {
+                        Assert.ThrowsException<OverflowException>(() =>
+                        {
+                            var a = Util.ToByte(key, length, Definitions.Endian.Big);
+                            a = Util.ToByte(key, length, Definitions.Endian.Little);
+                        }, "Overflow exception in big endian. length: " + length);
+                        Assert.ThrowsException<OverflowException>(() =>
+                        {
+                            var a = Util.ToByte(key, length, Definitions.Endian.Little);
+                        }, "Overflow exception in little endian. length: " + length);
+                        continue;
+                    }
+                    else if (key < -maxNum)
+                    {
+                        Assert.ThrowsException<OverflowException>(() =>
+                        {
+                            var a = Util.ToByte(key, length, Definitions.Endian.Big);
+                        }, "Invalid cast exception");
+
+                        Assert.ThrowsException<OverflowException>(() =>
+                        {
+                            var a = Util.ToByte(key, length, Definitions.Endian.Little);
+                        }, "Invalid cast exception");
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public void IntToByte_Normal()
+        {
+            foreach (Int32 key in IntByteData3.Keys)
+            {
+                for (int length = 1; length < 5; length++)
+                {
+                    Int64 maxNum = (Int64)(Math.Pow(2, (length * 8)) / 2 - 1);
+                    if (key > maxNum || key < -maxNum)
+                    {
+                        continue;
+                    }
+
+                    var expected_big = TestUtil.GetLastElements(IntByteData3[key], length);
+                    if (key < 0)
+                    {
+                        expected_big[0] |= 0x80;
+                    }
+                    var actual_big = Util.ToByte(key, length, Definitions.Endian.Big);
+                    TestUtil.AreEqual(expected_big, actual_big, "Big endian Int->Byte test. key: " + key);
+
+                    var expected_Little = TestUtil.GetLastElements(IntByteData3[key], length);
+                    Array.Reverse(expected_Little);
+                    if (key < 0)
+                    {
+                        expected_Little[expected_Little.Length - 1] |= 0x80;
+                    }                    
+                    var actual_little = Util.ToByte(key, length, Definitions.Endian.Little);
+                    TestUtil.AreEqual(expected_Little, actual_little, "Little endian Int->Byte test. key: " + key);
                 }
             }
         }
@@ -207,7 +302,7 @@ namespace NtImageProcessorTest.MetaData.Misc
             Assert.AreEqual(0x201, Util.GetSIntValue(TestByteArray1, 2, 2, Definitions.Endian.Little));
             Assert.AreEqual(0x10203, Util.GetSIntValue(TestByteArray1, 1, 4, Definitions.Endian.Big));
             Assert.AreEqual(0x3020100, Util.GetSIntValue(TestByteArray1, 1, 4, Definitions.Endian.Little));
-            
+
 
             Assert.ThrowsException<IndexOutOfRangeException>(() =>
             {
