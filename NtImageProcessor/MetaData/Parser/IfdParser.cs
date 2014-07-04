@@ -63,12 +63,16 @@ namespace NtImageProcessor.MetaData.Parser
                 if (TotalValueSize <= 4)
                 {
                     // in this case, the value is stored directly here.
+
+                    // Todo: consider endian before storing
                     Array.Copy(App1Data, EntryOrigin + 8, valueBuff, 0, TotalValueSize);
                 }
                 else
                 {
                     // other cases, actual value is stored in separated area
                     var EntryValuePointer = (int)Util.GetUIntValue(App1Data, EntryOrigin + 8, 4);
+
+                    // Todo: consider endian 
                     Array.Copy(App1Data, EntryValuePointer, valueBuff, 0, TotalValueSize);
 
                     // If there's extra data, its length should be added to total length.
@@ -92,7 +96,7 @@ namespace NtImageProcessor.MetaData.Parser
                         }
                         else
                         {
-                            foreach (int val in entry.IntValues)
+                            foreach (int val in entry.UIntValues)
                             {
                                 Debug.WriteLine("value: " + val.ToString("X"));
                             }
@@ -102,7 +106,7 @@ namespace NtImageProcessor.MetaData.Parser
                     case Entry.EntryType.SShort:
                     case Entry.EntryType.Long:
                     case Entry.EntryType.SLong:
-                        foreach (int val in entry.IntValues)
+                        foreach (int val in entry.UIntValues)
                         {
                             Debug.WriteLine("value: " + val);
                         }

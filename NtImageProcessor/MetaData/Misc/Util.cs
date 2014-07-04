@@ -69,6 +69,45 @@ namespace NtImageProcessor.MetaData.Misc
             return ret;
         }
 
+        public static byte[] ToByte(Int32 value, int length, Definitions.Endian endian = Definitions.Endian.Little)
+        {
+            if (value > Int32.MaxValue)
+            {
+                throw new OverflowException();
+            }
+            else if (value < Int32.MinValue)
+            {
+                throw new InvalidCastException();
+            }
+
+            bool isNegative = false;
+            if (value < 0)
+            {
+                isNegative = true;
+            }
+
+            var ByteValue = new byte[length];
+            if (isNegative)
+            {
+                ByteValue = ToByte((UInt32)(value * -1), length, endian);
+                // set the highest bit
+                if (endian == Definitions.Endian.Little)
+                {
+                    ByteValue[ByteValue.Length - 1] |= 0x80;
+                }
+                else
+                {
+                    ByteValue[0] |= 0x80;
+                }
+            }
+            else
+            {
+                ByteValue = ToByte((UInt32)value, length, endian);
+            }
+
+            return ByteValue;
+        }
+
         public static UnsignedFraction ToUnsignedFraction(double value)
         {
             if (value < 0)
@@ -158,6 +197,10 @@ namespace NtImageProcessor.MetaData.Misc
             if (length > 4)
             {
                 throw new InvalidCastException("Uint32 type can't store more than 4 bytes");
+            }
+            if (length < 1)
+            {
+                throw new InvalidCastException();
             }
 
             Int32 value = 0;

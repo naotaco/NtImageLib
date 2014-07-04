@@ -111,7 +111,7 @@ namespace NtImageProcessor.MetaData.Composer
                     Type = Entry.EntryType.Long,
                     Count = 1,
                 };
-            exifIfdPointerEntry.IntValues = new UInt32[] { (UInt32)exifIfdPointer };
+            exifIfdPointerEntry.UIntValues = new UInt32[] { (UInt32)exifIfdPointer };
             MetaData.PrimaryIfd.Entries.Add(Definitions.EXIF_IFD_POINTER_TAG, exifIfdPointerEntry);
 
             if (MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
@@ -125,7 +125,7 @@ namespace NtImageProcessor.MetaData.Composer
                 Type = Entry.EntryType.Long,
                 Count = 1,
             };
-            gpsIfdPointerEntry.IntValues = new UInt32[] { (UInt32)gpsIfdPointer };
+            gpsIfdPointerEntry.UIntValues = new UInt32[] { (UInt32)gpsIfdPointer };
             MetaData.PrimaryIfd.Entries.Add(Definitions.GPS_IFD_POINTER_TAG, gpsIfdPointerEntry);
 
             var nextIfdPointer = 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length;

@@ -21,7 +21,7 @@ namespace NtImageProcessor.MetaData.Misc
                 Type = Entry.EntryType.Byte,
                 Count = 4,
             };
-            GPSVersionEntry.IntValues = new UInt32[] { 2, 2, 0, 0 };
+            GPSVersionEntry.UIntValues = new UInt32[] { 2, 2, 0, 0 };
             gpsIfdData.Entries.Add(GPSVersionEntry.Tag, GPSVersionEntry);
 
             var LatitudeRefEntry = new Entry()
@@ -39,7 +39,7 @@ namespace NtImageProcessor.MetaData.Misc
             {
                 latRef = 'S';
             }
-            LatitudeRefEntry.IntValues = new UInt32[] { (byte)latRef, 0 };
+            LatitudeRefEntry.UIntValues = new UInt32[] { (byte)latRef, 0 };
             gpsIfdData.Entries.Add(LatitudeRefEntry.Tag, LatitudeRefEntry);
 
             var LatitudeEntry = new Entry()
@@ -69,7 +69,7 @@ namespace NtImageProcessor.MetaData.Misc
             {
                 lonRef = 'W';
             }
-            LongitudeRef.IntValues = new UInt32[] { (byte)lonRef, 0 };
+            LongitudeRef.UIntValues = new UInt32[] { (byte)lonRef, 0 };
             gpsIfdData.Entries.Add(LongitudeRef.Tag, LongitudeRef);
 
             var Longitude = new Entry()

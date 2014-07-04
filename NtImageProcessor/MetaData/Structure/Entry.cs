@@ -15,7 +15,10 @@ namespace NtImageProcessor.MetaData.Structure
         public const int COUNT_LEN = 4;
         public const int OFFSET_LEN = 4;
 
-        Definitions.Endian endian = Definitions.Endian.Big;
+        /// <summary>
+        /// This value determins internal alignment of raw data, "value".
+        /// </summary>
+        public const Definitions.Endian InternalEndian = Definitions.Endian.Big;
 
         /// <summary>
         /// 
@@ -80,14 +83,16 @@ namespace NtImageProcessor.MetaData.Structure
         public UInt32 Offset { get; set; }
 
         /// <summary>
-        /// Stores raw value data.
+        /// Stores raw value data. 
+        /// Note that alignment of this raw value is determined by "InternalEndian".
+        /// before storing byte array directly, align it to the endian.
         /// </summary>
         public byte[] value { get; set; }
 
         /// <summary>
-        /// Returns value as integer
+        /// Get/set values as unsigned int.
         /// </summary>
-        public UInt32[] IntValues
+        public UInt32[] UIntValues
         {
             get
             {
@@ -95,7 +100,7 @@ namespace NtImageProcessor.MetaData.Structure
                 var len = Util.FindDataSize(this.Type);
                 for (int i = 0; i < Count; i++)
                 {
-                    v[i] = Util.GetUIntValue(value, i * len, len);
+                    v[i] = Util.GetUIntValue(value, i * len, len, InternalEndian);
                 }
                 return v;
             }
@@ -105,8 +110,35 @@ namespace NtImageProcessor.MetaData.Structure
                 for (int i = 0; i < value.Length; i++)
                 {
                     Debug.WriteLine("value: " + value[i]);
-                    var v = Util.ToByte(value[i], Util.FindDataSize(this.Type), endian);
+                    var v = Util.ToByte(value[i], Util.FindDataSize(this.Type), InternalEndian);
                     Array.Copy(v, 0, newValue, i * Util.FindDataSize(this.Type), v.Length);
+                }
+                this.value = newValue;
+            }
+        }
+
+        /// <summary>
+        /// Get/set values as signed int.
+        /// </summary>
+        public Int32[] IntValues
+        {
+            get
+            {
+                var v = new Int32[this.Count];
+                var len = Util.FindDataSize(this.Type);
+                for (int i = 0; i < Count; i++)
+                {
+                    v[i] = Util.GetSIntValue(value, i * len, len, InternalEndian);
+                }
+                return v;
+            }
+            set 
+            {
+                var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
+                for (int i = 0; i < value.Length; i++)
+                {
+                    var v = Util.ToByte(value[i], Util.FindDataSize(this.Type), InternalEndian);
+                    Array.ConstrainedCopy(v, 0, newValue, i * Util.FindDataSize(this.Type), v.Length);
                 }
                 this.value = newValue;
             }
@@ -180,7 +212,7 @@ namespace NtImageProcessor.MetaData.Structure
                 for (int i = 0; i < value.Length; i++)
                 {
                     var f = Util.ToUnsignedFraction(value[i]);
-                    var v = Util.ToByte(f, endian);
+                    var v = Util.ToByte(f, InternalEndian);
                     Debug.WriteLine("val " + value[i] + " " + f.Numerator + "/" + f.Denominator);
                     Array.Copy(v, 0, newValue, i * 8, 8);
                 }

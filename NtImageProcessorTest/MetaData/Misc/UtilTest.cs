@@ -192,5 +192,38 @@ namespace NtImageProcessorTest.MetaData.Misc
                 Assert.AreEqual(value, ((double)fraction.Numerator / (double)fraction.Denominator));
             }
         }
+
+        public static byte[] TestByteArray1 = new byte[] { 0x00, 0x00, 0x1, 0x2, 0x3, 0x4 };
+        public static byte[] TestByteArray2 = new byte[] { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x4 };
+
+        [TestMethod]
+        public void ByteToSInt()
+        {
+            Assert.AreEqual(0, Util.GetSIntValue(TestByteArray1, 0, 1, Definitions.Endian.Big));
+            Assert.AreEqual(0, Util.GetSIntValue(TestByteArray1, 0, 1, Definitions.Endian.Little));
+            Assert.AreEqual(1, Util.GetSIntValue(TestByteArray1, 2, 1, Definitions.Endian.Big));
+            Assert.AreEqual(1, Util.GetSIntValue(TestByteArray1, 2, 1, Definitions.Endian.Little));
+            Assert.AreEqual(0x102, Util.GetSIntValue(TestByteArray1, 2, 2, Definitions.Endian.Big));
+            Assert.AreEqual(0x201, Util.GetSIntValue(TestByteArray1, 2, 2, Definitions.Endian.Little));
+            Assert.AreEqual(0x10203, Util.GetSIntValue(TestByteArray1, 1, 4, Definitions.Endian.Big));
+            Assert.AreEqual(0x3020100, Util.GetSIntValue(TestByteArray1, 1, 4, Definitions.Endian.Little));
+            
+
+            Assert.ThrowsException<IndexOutOfRangeException>(() =>
+            {
+                var a = Util.GetSIntValue(TestByteArray1, 6, 1);
+            });
+
+            Assert.ThrowsException<InvalidCastException>(() =>
+            {
+                var a = Util.GetSIntValue(TestByteArray1, 2, 0);
+            });
+
+            Assert.ThrowsException<InvalidCastException>(() =>
+            {
+                var a = Util.GetSIntValue(TestByteArray1, 2, 7);
+            });
+
+        }
     }
 }
