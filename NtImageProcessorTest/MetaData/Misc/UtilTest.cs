@@ -145,5 +145,52 @@ namespace NtImageProcessorTest.MetaData.Misc
             Assert.AreEqual((UInt32)0x10203, Util.GetUIntValue(array1, 3, 3, Definitions.Endian.Big));
             Assert.AreEqual((UInt32)0x30201, Util.GetUIntValue(array1, 3, 3, Definitions.Endian.Little));
         }
+
+        public static double[] TestDoubleData = new double[] { -0xFFFFFFFF, -0xFF, -1, 0, 1, 0xFF, 0xFFFFFFFF, -1.3, 3.3 };
+
+        [TestMethod]
+        public void DoubleToUnsignedFraction()
+        {
+            foreach (double value in TestDoubleData)
+            {
+                if (value < 0)
+                {
+                    Assert.ThrowsException<InvalidCastException>(() =>
+                    {
+                        var a = Util.ToUnsignedFraction(value);
+                    }, "Invalid cast exception with value less than 0");
+                    continue;
+                }
+                var fraction = Util.ToUnsignedFraction(value);
+                Assert.AreEqual(value, ((double)fraction.Numerator / (double)fraction.Denominator));
+            }
+        }
+
+        [TestMethod]
+        public void DoubleToSignedFraction()
+        {
+            foreach (double value in TestDoubleData)
+            {
+                if (value > 0xEFFFFFFF)
+                {
+                    Assert.ThrowsException<OverflowException>(() =>
+                    {
+                        var a = Util.ToSignedFraction(value);
+                    }, "Too big for signed int32 type");
+                    continue;
+                }
+                else if (value < -0xEFFFFFFF)
+                {
+                    Assert.ThrowsException<InvalidCastException>(() =>
+                    {
+                        var a = Util.ToSignedFraction(value);
+                    }, "too small for signed int type");
+                    continue;
+                }
+
+                var fraction = Util.ToSignedFraction(value);
+                Assert.AreEqual(value, ((double)fraction.Numerator / (double)fraction.Denominator));
+            }
+        }
     }
 }

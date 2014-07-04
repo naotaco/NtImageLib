@@ -71,6 +71,16 @@ namespace NtImageProcessor.MetaData.Misc
 
         public static UnsignedFraction ToUnsignedFraction(double value)
         {
+            if (value < 0)
+            {
+                throw new InvalidCastException();
+            }
+
+            if (value > UInt32.MaxValue)
+            {
+                throw new OverflowException();
+            }
+
             var fraction = new UnsignedFraction();
             UInt32 denominator = 1;
             while (value - System.Math.Floor(value) != 0)
@@ -79,9 +89,45 @@ namespace NtImageProcessor.MetaData.Misc
                 denominator *= 10;
             }
 
+            if (value > UInt32.MaxValue || denominator > UInt32.MaxValue)
+            {
+                throw new OverflowException();
+            }
+
             fraction.Numerator = (UInt32)System.Math.Floor(value);
             fraction.Denominator = denominator;
             return fraction;
+        }
+
+        public static SignedFraction ToSignedFraction(double value)
+        {
+            if (value > Int32.MaxValue)
+            {
+                throw new OverflowException();
+            }
+
+            if (value < Int32.MinValue)
+            {
+                throw new InvalidCastException();
+            }
+
+            var fraction = new SignedFraction();
+            Int32 denominator = 1;
+            while (value - System.Math.Floor(value) != 0)
+            {
+                value *= 10;
+                denominator *= 10;
+            }
+
+            if (value > Int32.MaxValue || denominator > Int32.MaxValue)
+            {
+                throw new OverflowException();
+            }
+
+            fraction.Numerator = (Int32)System.Math.Floor(value);
+            fraction.Denominator = denominator;
+            return fraction;
+
         }
 
         public static byte[] ToByte(UnsignedFraction value, Definitions.Endian endian = Definitions.Endian.Little)
