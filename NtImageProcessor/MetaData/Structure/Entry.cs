@@ -91,6 +91,8 @@ namespace NtImageProcessor.MetaData.Structure
 
         /// <summary>
         /// Get/set values as unsigned int.
+        /// This method stores its value as byte array.
+        /// To determin it's size (char, shoft, long), set Type of this class before setting values.
         /// </summary>
         public UInt32[] UIntValues
         {
@@ -120,6 +122,8 @@ namespace NtImageProcessor.MetaData.Structure
 
         /// <summary>
         /// Get/set values as signed int.
+        /// This method stores its value as byte array.
+        /// To determin it's size (char, shoft, long), set Type of this class before setting values.
         /// </summary>
         public Int32[] IntValues
         {
@@ -147,7 +151,7 @@ namespace NtImageProcessor.MetaData.Structure
         }
 
         /// <summary>
-        /// Returns value as unsigned rational data
+        /// get/set values as unsigned rational data.
         /// </summary>
         public UnsignedFraction[] UFractionValues
         {
@@ -165,8 +169,23 @@ namespace NtImageProcessor.MetaData.Structure
                 }
                 return v;
             }
+            set
+            {
+                this.Count = (UInt32)value.Length;
+                this.Type = EntryType.Rational;
+                var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
+                for (int i = 0; i < value.Length; i++)
+                {
+                    var v = Util.ToByte(value[i], InternalEndian);
+                    Array.Copy(v, 0, newValue, i * Util.FindDataSize(this.Type), Util.FindDataSize(this.Type));
+                }
+                this.value = newValue;
+            }
         }
 
+        /// <summary>
+        /// get/set values as Signed rational data.
+        /// </summary>
         public SignedFraction[] SFractionValues
         {
             get
@@ -183,11 +202,24 @@ namespace NtImageProcessor.MetaData.Structure
                 }
                 return v;
             }
+            set
+            {
+                this.Count = (UInt32)value.Length;
+                this.Type = EntryType.SRational;
+                var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
+                for (int i = 0; i < value.Length; i++)
+                {
+                    var v = Util.ToByte(value[i], InternalEndian);
+                    Array.Copy(v, 0, newValue, i * Util.FindDataSize(this.Type), Util.FindDataSize(this.Type));
+                }
+                this.value = newValue;
+            }
         }
 
         /// <summary>
         /// Get/set double values.
-        /// This property supports only Rational and SRational types.
+        /// This property supports only Rational and SRational types;
+        /// specify its type before setting.
         /// </summary>
         public double[] DoubleValues
         {
