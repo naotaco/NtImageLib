@@ -18,6 +18,24 @@ namespace NtImageProcessorTest
             }
         }
 
+        public static void AreEqual(Int32[] expected, Int32[] actual, string message = "")
+        {
+            Assert.AreEqual(expected.Length, actual.Length, message + " at length comparison");
+            for (int i = 0; i < expected.Length; i++)
+            {
+                Assert.AreEqual(expected[i], actual[i], message + " at element comparison. i: " + i);
+            }
+        }
+
+        public static void AreEqual(UInt32[] expected, UInt32[] actual, string message = "")
+        {
+            Assert.AreEqual(expected.Length, actual.Length, message + " at length comparison");
+            for (int i = 0; i < expected.Length; i++)
+            {
+                Assert.AreEqual(expected[i], actual[i], message + " at element comparison. i: " + i);
+            }
+        }
+
         public static byte[] GetLastElements(byte[] array, int newLength)
         {
             var newArray = new byte[newLength];

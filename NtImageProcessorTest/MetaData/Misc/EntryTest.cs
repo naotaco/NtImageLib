@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NtImageProcessor.MetaData.Misc;
 using NtImageProcessor.MetaData.Structure;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+using System.Diagnostics;
 
 namespace NtImageProcessorTest.MetaData.Misc
 {
@@ -150,6 +151,71 @@ namespace NtImageProcessorTest.MetaData.Misc
                 };
                 entry1.DoubleValues = new double[] { value };
                 Assert.AreEqual(value, entry1.DoubleValues[0], "value: " + value);
+            }
+        }
+
+        private static readonly Dictionary<Int32[], Entry> EntryIntByteData = new Dictionary<Int32[], Entry>()
+        {
+            { new Int32[]{0},
+                new Entry(){
+                Type = Entry.EntryType.SShort,
+                Count = 1,
+                value = new byte[]{0,0},
+            }},
+            { new Int32[]{1,1},
+                new Entry(){
+                Type = Entry.EntryType.SShort,
+                Count = 2,
+                value = new byte[]{0,1,0,1},
+            }},
+            { new Int32[]{0x7FFF},
+                new Entry(){
+                Type = Entry.EntryType.SShort,
+                Count = 1,
+                value = new byte[]{0x7F,0xFF},
+            }},
+            { new Int32[]{-0x7FFF,-3},
+                new Entry(){
+                Type = Entry.EntryType.SShort,
+                Count = 2,
+                value = new byte[]{0xFF,0xFF,0x80,0x03},
+            }},
+            { new Int32[]{0},
+                new Entry(){
+                Type = Entry.EntryType.SLong,
+                Count = 1,
+                value = new byte[]{0,0,0,0},
+            }},
+            { new Int32[]{0x7FFFFFFF},
+                new Entry(){
+                Type = Entry.EntryType.SLong,
+                Count = 1,
+                value = new byte[]{0x7F, 0xFF, 0xFF, 0xFF},
+            }},
+            { new Int32[]{-0xFF},
+                new Entry(){
+                Type = Entry.EntryType.SLong,
+                Count = 1,
+                value = new byte[]{0x80,0,0,0xFF},
+            }},
+        };
+
+        [TestMethod]
+        public void EntryIntRawValueTest()
+        {
+            foreach (Int32[] values in EntryIntByteData.Keys)
+            {
+                TestUtil.AreEqual(values, EntryIntByteData[values].IntValues, "0 values 0 : " + values[0]);
+                Debug.WriteLine("val: " + values[0]);
+
+                var entry = new Entry()
+                {
+                    Type = EntryIntByteData[values].Type,
+                    Count = EntryIntByteData[values].Count,
+                };
+                entry.IntValues = values;
+
+                TestUtil.AreEqual(EntryIntByteData[values].value, entry.value, "1 values 0 : " + values[0]);
             }
         }
 
