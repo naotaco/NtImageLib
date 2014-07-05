@@ -64,38 +64,24 @@ namespace NtImageProcessor.MetaData.Parser
                 if (TotalValueSize <= 4)
                 {
                     // in this case, the value is stored directly here.
-
-                    // Todo: consider endian before storing raw byte array data.
-                    if (IfdSectionEndian == Definitions.Endian.Little)
-                    {
-                        Array.Copy(App1Data, EntryOrigin + 8, valueBuff, 0, TotalValueSize);
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                    Array.Copy(App1Data, EntryOrigin + 8, valueBuff, 0, TotalValueSize);
                 }
                 else
                 {
                     // other cases, actual value is stored in separated area
                     var EntryValuePointer = (int)Util.GetUIntValue(App1Data, EntryOrigin + 8, 4, IfdSectionEndian);
 
-                    // Todo: consider endian 
-                    if (IfdSectionEndian == Definitions.Endian.Little)
-                    {
-                        Array.Copy(App1Data, EntryValuePointer, valueBuff, 0, TotalValueSize);
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                    Array.Copy(App1Data, EntryValuePointer, valueBuff, 0, TotalValueSize);
 
                     // If there's extra data, its length should be added to total length.
                     ifd.Length += (UInt32)TotalValueSize;
                 }
 
+                if (IfdSectionEndian != Entry.InternalEndian)
+                {
+                    Array.Reverse(valueBuff);
+                }
                 entry.value = valueBuff;
-
                 
                 switch (entry.Type)
                 {
