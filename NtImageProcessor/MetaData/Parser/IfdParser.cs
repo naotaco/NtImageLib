@@ -18,16 +18,17 @@ namespace NtImageProcessor.MetaData.Parser
         /// </summary>
         /// <param name="App1Data">Raw data of App1 section</param>
         /// <param name="IfdOffset">Offset to the target IFD section from start of App1 data.</param>
+        /// <param name="IfdSectionEndian">Alignment of all sections of this IFD data. This value is contained in TIFF header.</param>
         /// <returns>All entries in given IFD section.</returns>
-        public static IfdData ParseIfd(byte[] App1Data, UInt32 IfdOffset)
+        public static IfdData ParseIfd(byte[] App1Data, UInt32 IfdOffset, Definitions.Endian IfdSectionEndian)
         {
             var ifd = new IfdData();
             ifd.Offset = IfdOffset;
             var entries = new Dictionary<UInt32, Entry>();
-            var EntryNum = Util.GetUIntValue(App1Data, (int)IfdOffset, 2);
+            var EntryNum = Util.GetUIntValue(App1Data, (int)IfdOffset, 2, IfdSectionEndian);
             Debug.WriteLine("Entry num: " + EntryNum);
 
-            ifd.NextIfdPointer = Util.GetUIntValue(App1Data, (int)IfdOffset + 2 + (int)EntryNum * ENTRY_SIZE, 4);
+            ifd.NextIfdPointer = Util.GetUIntValue(App1Data, (int)IfdOffset + 2 + (int)EntryNum * ENTRY_SIZE, 4, IfdSectionEndian);
 
             // if there's no extra data area, (if all data is 4 bytes or less), this is length of this IFD section.
             ifd.Length = 2 + EntryNum * ENTRY_SIZE + 4; // entry num (2 bytes), each entries (12 bytes each), Next IFD pointer (4 byte)
@@ -40,17 +41,17 @@ namespace NtImageProcessor.MetaData.Parser
                 var entry = new Entry();
 
                 // tag
-                entry.Tag = Util.GetUIntValue(App1Data, EntryOrigin, 2);
+                entry.Tag = Util.GetUIntValue(App1Data, EntryOrigin, 2, IfdSectionEndian);
                 var tagTypeName = Util.TagNames[entry.Tag];
                 // Debug.WriteLine("Tag: " + entry.Tag.ToString("X") + " " + tagTypeName);
 
                 // type
-                var typeValue = Util.GetUIntValue(App1Data, EntryOrigin + 2, 2);
+                var typeValue = Util.GetUIntValue(App1Data, EntryOrigin + 2, 2, IfdSectionEndian);
                 entry.Type = Util.ToEntryType(typeValue);
                 // Debug.WriteLine("Type: " + entry.Type.ToString());
 
                 // count
-                entry.Count = Util.GetUIntValue(App1Data, EntryOrigin + 4, 4);
+                entry.Count = Util.GetUIntValue(App1Data, EntryOrigin + 4, 4, IfdSectionEndian);
                 // Debug.WriteLine("Count: " + entry.Count);
 
                 var valueSize = 0;
@@ -64,16 +65,30 @@ namespace NtImageProcessor.MetaData.Parser
                 {
                     // in this case, the value is stored directly here.
 
-                    // Todo: consider endian before storing
-                    Array.Copy(App1Data, EntryOrigin + 8, valueBuff, 0, TotalValueSize);
+                    // Todo: consider endian before storing raw byte array data.
+                    if (IfdSectionEndian == Definitions.Endian.Little)
+                    {
+                        Array.Copy(App1Data, EntryOrigin + 8, valueBuff, 0, TotalValueSize);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
                 }
                 else
                 {
                     // other cases, actual value is stored in separated area
-                    var EntryValuePointer = (int)Util.GetUIntValue(App1Data, EntryOrigin + 8, 4);
+                    var EntryValuePointer = (int)Util.GetUIntValue(App1Data, EntryOrigin + 8, 4, IfdSectionEndian);
 
                     // Todo: consider endian 
-                    Array.Copy(App1Data, EntryValuePointer, valueBuff, 0, TotalValueSize);
+                    if (IfdSectionEndian == Definitions.Endian.Little)
+                    {
+                        Array.Copy(App1Data, EntryValuePointer, valueBuff, 0, TotalValueSize);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
 
                     // If there's extra data, its length should be added to total length.
                     ifd.Length += (UInt32)TotalValueSize;

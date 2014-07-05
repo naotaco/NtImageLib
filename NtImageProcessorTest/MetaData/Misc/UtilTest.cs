@@ -306,17 +306,17 @@ namespace NtImageProcessorTest.MetaData.Misc
 
             Assert.ThrowsException<IndexOutOfRangeException>(() =>
             {
-                var a = Util.GetSIntValue(TestByteArray1, 6, 1);
+                var a = Util.GetSIntValue(TestByteArray1, 6, 1, Definitions.Endian.Little);
             });
 
             Assert.ThrowsException<InvalidCastException>(() =>
             {
-                var a = Util.GetSIntValue(TestByteArray1, 2, 0);
+                var a = Util.GetSIntValue(TestByteArray1, 2, 0, Definitions.Endian.Little);
             });
 
             Assert.ThrowsException<InvalidCastException>(() =>
             {
-                var a = Util.GetSIntValue(TestByteArray1, 2, 7);
+                var a = Util.GetSIntValue(TestByteArray1, 2, 7, Definitions.Endian.Little);
             });
 
         }

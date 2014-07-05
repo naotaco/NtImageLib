@@ -163,8 +163,8 @@ namespace NtImageProcessor.MetaData.Structure
                 {
                     //v[i] = Util.GetUIntValue(value, i * len, len); 
                     var f = new UnsignedFraction();
-                    f.Numerator = Util.GetUIntValue(value, i * len, 4);
-                    f.Denominator = Util.GetUIntValue(value, i * len + 4, 4);
+                    f.Numerator = Util.GetUIntValue(value, i * len, 4, InternalEndian);
+                    f.Denominator = Util.GetUIntValue(value, i * len + 4, 4, InternalEndian);
                     v[i] = f;
                 }
                 return v;
@@ -196,8 +196,8 @@ namespace NtImageProcessor.MetaData.Structure
                 {
                     //v[i] = Util.GetUIntValue(value, i * len, len); 
                     var f = new SignedFraction();
-                    f.Numerator = Util.GetSIntValue(value, i * len, 4);
-                    f.Denominator = Util.GetSIntValue(value, i * len + 4, 4);
+                    f.Numerator = Util.GetSIntValue(value, i * len, 4, InternalEndian);
+                    f.Denominator = Util.GetSIntValue(value, i * len + 4, 4, InternalEndian);
                     v[i] = f;
                 }
                 return v;

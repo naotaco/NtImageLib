@@ -11,7 +11,7 @@ namespace NtImageProcessor.MetaData.Misc
 {
     public static class Util
     {
-        public static UInt32 GetUIntValue(byte[] data, int address, int length, Definitions.Endian endian = Definitions.Endian.Little)
+        public static UInt32 GetUIntValue(byte[] data, int address, int length, Definitions.Endian endian)
         {
             // if bigger than 4 bytes, can't set to int type.
             if (length > 4 || length <= 0)
@@ -36,7 +36,7 @@ namespace NtImageProcessor.MetaData.Misc
             return value;
         }
 
-        public static byte[] ToByte(UInt32 value, int length, Definitions.Endian endian = Definitions.Endian.Little)
+        public static byte[] ToByte(UInt32 value, int length, Definitions.Endian endian)
         {
             if (length > 4 || length <= 0)
             {
@@ -69,7 +69,7 @@ namespace NtImageProcessor.MetaData.Misc
             return ret;
         }
 
-        public static byte[] ToByte(Int32 value, int length, Definitions.Endian endian = Definitions.Endian.Little)
+        public static byte[] ToByte(Int32 value, int length, Definitions.Endian endian)
         {
             if (value > Int32.MaxValue)
             {
@@ -195,7 +195,7 @@ namespace NtImageProcessor.MetaData.Misc
 
         }
 
-        public static byte[] ToByte(UnsignedFraction value, Definitions.Endian endian = Definitions.Endian.Little)
+        public static byte[] ToByte(UnsignedFraction value, Definitions.Endian endian)
         {
             var ret = new byte[8];
             Array.Copy(Util.ToByte(value.Numerator, 4, endian), 0, ret, 0, 4);
@@ -225,7 +225,7 @@ namespace NtImageProcessor.MetaData.Misc
             return ret;
         }
 
-        public static Int32 GetSIntValue(byte[] data, int address, int length, Definitions.Endian endian = Definitions.Endian.Little)
+        public static Int32 GetSIntValue(byte[] data, int address, int length, Definitions.Endian endian)
         {
             // if bigger than 4 bytes, can't set to int type.
             if (length > 4)
