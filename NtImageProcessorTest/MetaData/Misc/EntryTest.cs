@@ -108,9 +108,48 @@ namespace NtImageProcessorTest.MetaData.Misc
         {
             foreach (double value in TestDoubleValues)
             {
-                foreach (Entry.EntryType type in UnsignedEntryTypes)
+                var entry = new Entry()
                 {
-                }
+                    Type = Entry.EntryType.Rational,
+                    Count = 1,
+                    Tag = 0x0,
+                };
+                entry.DoubleValues = new double[] { value };
+                Assert.AreEqual(value, entry.DoubleValues[0], "value: " + value);
+
+                var entry1 = new Entry()
+                {
+                    Type = Entry.EntryType.SRational,
+                    Count = 1,
+                    Tag = 0x0,
+                };
+                entry1.DoubleValues = new double[] { value };
+                Assert.AreEqual(value, entry1.DoubleValues[0], "value: " + value);
+
+            }
+
+            foreach (double value in TestNegativeDoubleValues)
+            {
+
+                var entry = new Entry()
+                {
+                    Type = Entry.EntryType.Rational,
+                    Count = 1,
+                    Tag = 0x0,
+                };
+                Assert.ThrowsException<InvalidCastException>(() =>
+                {
+                    entry.DoubleValues = new double[] { value };
+                });
+
+                var entry1 = new Entry()
+                {
+                    Type = Entry.EntryType.SRational,
+                    Count = 1,
+                    Tag = 0x0,
+                };
+                entry1.DoubleValues = new double[] { value };
+                Assert.AreEqual(value, entry1.DoubleValues[0], "value: " + value);
             }
         }
 
