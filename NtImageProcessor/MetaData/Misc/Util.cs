@@ -203,6 +203,14 @@ namespace NtImageProcessor.MetaData.Misc
             return ret;
         }
 
+        public static byte[] ToByte(SignedFraction value, Definitions.Endian endian)
+        {
+            var ret = new byte[8];
+            Array.Copy(Util.ToByte(value.Numerator, 4, endian), 0, ret, 0, 4);
+            Array.Copy(Util.ToByte(value.Denominator, 4, endian), 0, ret, 4, 4);
+            return ret;
+        }
+
         public static byte[] ToByte(string str)
         {
             var ret = new byte[str.Length + 1];

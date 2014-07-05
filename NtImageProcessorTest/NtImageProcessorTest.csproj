@@ -74,6 +74,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="LocalizedStrings.cs" />
+    <Compile Include="MetaData\Misc\EntryTest.cs" />
     <Compile Include="MetaData\Misc\UtilTest.cs" />
     <Compile Include="TestUtil.cs" />
     <Compile Include="UnitTest1.cs" />

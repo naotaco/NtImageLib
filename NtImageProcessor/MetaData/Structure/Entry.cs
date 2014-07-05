@@ -106,6 +106,7 @@ namespace NtImageProcessor.MetaData.Structure
             }
             set
             {
+                this.Count = (UInt32)value.Length;
                 var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
                 for (int i = 0; i < value.Length; i++)
                 {
@@ -134,6 +135,7 @@ namespace NtImageProcessor.MetaData.Structure
             }
             set 
             {
+                this.Count = (UInt32)value.Length;
                 var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
                 for (int i = 0; i < value.Length; i++)
                 {
@@ -183,6 +185,10 @@ namespace NtImageProcessor.MetaData.Structure
             }
         }
 
+        /// <summary>
+        /// Get/set double values.
+        /// This property supports only Rational and SRational types.
+        /// </summary>
         public double[] DoubleValues
         {
             get
@@ -208,13 +214,23 @@ namespace NtImageProcessor.MetaData.Structure
             }
             set
             {
-                var newValue = new byte[value.Length * 8];
+                this.Count = (UInt32)value.Length;
+                var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
                 for (int i = 0; i < value.Length; i++)
                 {
-                    var f = Util.ToUnsignedFraction(value[i]);
-                    var v = Util.ToByte(f, InternalEndian);
-                    Debug.WriteLine("val " + value[i] + " " + f.Numerator + "/" + f.Denominator);
-                    Array.Copy(v, 0, newValue, i * 8, 8);
+                    var v = new byte[Util.FindDataSize(this.Type)];
+                    switch (this.Type)
+                    {
+                        case EntryType.Rational:
+                            var f = Util.ToUnsignedFraction(value[i]);
+                            v = Util.ToByte(f, InternalEndian);
+                            break;
+                        case EntryType.SRational:
+                            var f1 = Util.ToSignedFraction(value[i]);
+                            v = Util.ToByte(f1, InternalEndian);
+                            break;
+                    }
+                    Array.Copy(v, 0, newValue, i * Util.FindDataSize(this.Type), Util.FindDataSize(this.Type));
                 }
                 this.value = newValue;
             }
