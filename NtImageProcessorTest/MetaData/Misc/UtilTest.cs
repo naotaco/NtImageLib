@@ -132,7 +132,7 @@ namespace NtImageProcessorTest.MetaData.Misc
             }
         }
 
-        public static Dictionary<Int32, byte[]> IntByteData3 = new Dictionary<Int32, byte[]>()
+        public readonly Dictionary<Int32, byte[]> IntByteData3 = new Dictionary<Int32, byte[]>()
         {
             // expected array is in Big endian.
             { 0, new byte[]{0,0,0,0}},
@@ -288,11 +288,48 @@ namespace NtImageProcessorTest.MetaData.Misc
             }
         }
 
-        public static byte[] TestByteArray1 = new byte[] { 0x00, 0x00, 0x1, 0x2, 0x3, 0x4 };
-        public static byte[] TestByteArray2 = new byte[] { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x4 };
+        public static readonly Dictionary<Int32, byte[]> IntByteData4 = new Dictionary<Int32, byte[]>()
+        {
+            // big endian.
+            {0, new byte[]{0}},
+            {1, new byte[]{1}},
+            {2, new byte[]{0, 2}},
+            {0xFF, new byte[]{0, 0xFF}},
+            {0x7F01, new byte[] {0x7F, 1}},
+            {0xFFFF, new byte[] {0,0,0xFF, 0xFF}},
+            {0x7FFF0000, new byte[] {0x7F, 0xFF, 0,0}},
+            {-1, new byte[]{0x81}},
+            {-2, new byte[] {0x80, 0x02}},
+            {-0xFF, new byte[]{0x80, 0xFF}},
+            {-0x7FFF, new byte[] {0xFF, 0xFF}},
+            {-0x7FFFFFFF, new byte[]{0xFF, 0xFF, 0xFF, 0xFF}},
+        };
 
         [TestMethod]
-        public void ByteToSInt()
+        public void ByteToSInt_Normal()
+        {
+            foreach (Int32 key in IntByteData4.Keys)
+            {
+                var value_big = new byte[IntByteData4[key].Length];
+                IntByteData4[key].CopyTo(value_big, 0);
+                var actual_big = Util.GetSIntValue(value_big, 0, value_big.Length, Definitions.Endian.Big);
+                Assert.AreEqual(key, actual_big, "key: " + key);
+
+                var value_little = new byte[IntByteData4[key].Length];
+                IntByteData4[key].CopyTo(value_little, 0);
+                Array.Reverse(value_little);
+
+                var actual_little = Util.GetSIntValue(value_little, 0, value_little.Length, Definitions.Endian.Little);
+                Assert.AreEqual(key, actual_little, "key: " + key);
+
+            }
+        }
+
+        public static readonly byte[] TestByteArray1 = new byte[] { 0x00, 0x00, 0x1, 0x2, 0x3, 0x4 };
+        public static readonly byte[] TestByteArray2 = new byte[] { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x4 };
+
+        [TestMethod]
+        public void ByteToSInt_Exception()
         {
             Assert.AreEqual(0, Util.GetSIntValue(TestByteArray1, 0, 1, Definitions.Endian.Big));
             Assert.AreEqual(0, Util.GetSIntValue(TestByteArray1, 0, 1, Definitions.Endian.Little));

@@ -238,19 +238,46 @@ namespace NtImageProcessor.MetaData.Misc
             }
 
             Int32 value = 0;
+            bool IsNegative = false;
+            // if highest bit is set, it's negative value.
+            if (endian == Definitions.Endian.Big)
+            {
+                if ((data[address] & 0x80) == 0x80)
+                {
+                    IsNegative = true;
+                    data[address] &= 0x7F; 
+                }
+                Debug.WriteLine("negative number: " + data[address + length - 1]);
+            }
+            else
+            {
+                if ((data[address + length - 1] & 0x80) == 0x80)
+                {
+                    IsNegative = true;
+                    data[address + length - 1] &= 0x7F;
+                    Debug.WriteLine("negative number: " + data[address + length - 1]);
+                }
+            }
+
+
             for (int i = 0; i < length; i++)
             {
                 // Debug.WriteLine(data[address + i].ToString("X"));
                 if (endian == Definitions.Endian.Little)
                 {
                     value += (Int32)data[address + i] << (i * 8);
+                    Debug.WriteLine("value: " + value);
                 }
                 else
                 {
                     value += (Int32)data[address + i] << ((length - 1 - i) * 8);
                 }
             }
-            // Debug.WriteLine("Return " + value.ToString("X"));
+            Debug.WriteLine("Return " + value.ToString("X"));
+            if (IsNegative)
+            {
+                value *= -1;
+            }
             return value;
         }
 
