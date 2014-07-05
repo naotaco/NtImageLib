@@ -23,25 +23,26 @@ namespace NtImageProcessor.MetaData.Composer
             var OriginalMetaData = JpegMetaDataParser.ParseImage(OriginalImage);
             Debug.WriteLine("Original image size: " + OriginalImage.Length.ToString("X"));
 
-            var endian = Definitions.Endian.Big;
+            // It seems there's a bug handling little endian jpeg image on WP OS.
+            var OutputImageMetadataEndian = Definitions.Endian.Big;
             
             // All data after this pointer will be kept.
             var FirstIfdPointer = MetaData.PrimaryIfd.NextIfdPointer;
 
             // check SOI, Start of image marker.
-            if (Util.GetUIntValue(OriginalImage, 0, 2, endian) != Definitions.JPEG_SOI_MARKER)
+            if (Util.GetUIntValue(OriginalImage, 0, 2, Definitions.Endian.Big) != Definitions.JPEG_SOI_MARKER)
             {
-                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(OriginalImage, 0, 2, endian));
+                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(OriginalImage, 0, 2, Definitions.Endian.Big));
             }
 
             // check APP1 maerker
-            if (Util.GetUIntValue(OriginalImage, 2, 2, endian) != Definitions.APP1_MARKER)
+            if (Util.GetUIntValue(OriginalImage, 2, 2, Definitions.Endian.Big) != Definitions.APP1_MARKER)
             {
-                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(OriginalImage, 2, 2, endian));
+                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(OriginalImage, 2, 2, Definitions.Endian.Big));
             }
 
             // Note: App1 size and ID are fixed to Big endian.
-            UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4, 2, endian);
+            UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4, 2, Definitions.Endian.Big);
             Debug.WriteLine("Original App1 size: " + OriginalApp1DataSize.ToString("X"));
 
             // 0-5 byte: Exif identify code. E, x, i, f, \0, \0
@@ -79,16 +80,16 @@ namespace NtImageProcessor.MetaData.Composer
             }
 
 
-            byte[] primaryIfd = IfdComposer.ComposeIfdsection(MetaData.PrimaryIfd);
+            byte[] primaryIfd = IfdComposer.ComposeIfdsection(MetaData.PrimaryIfd, OutputImageMetadataEndian);
             byte[] exifIfd = new byte[] { };
             byte[] gpsIfd = new byte[] { };
             if (MetaData.ExifIfd != null)
             {
-                exifIfd = IfdComposer.ComposeIfdsection(MetaData.ExifIfd);
+                exifIfd = IfdComposer.ComposeIfdsection(MetaData.ExifIfd, OutputImageMetadataEndian);
             }
             if (MetaData.GpsIfd != null)
             {
-                gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd);
+                gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd, OutputImageMetadataEndian);
             }
 
             Debug.WriteLine("Size fixed. Primary: " + primaryIfd.Length.ToString("X") + " exif: " + exifIfd.Length.ToString("X") + " gps: " + gpsIfd.Length.ToString("X"));
@@ -132,18 +133,18 @@ namespace NtImageProcessor.MetaData.Composer
             MetaData.PrimaryIfd.NextIfdPointer = (UInt32)nextIfdPointer;
 
             // finally, create byte array again
-            primaryIfd = IfdComposer.ComposeIfdsection(MetaData.PrimaryIfd);
+            primaryIfd = IfdComposer.ComposeIfdsection(MetaData.PrimaryIfd, OutputImageMetadataEndian);
 
             MetaData.ExifIfd.Offset = 8 + (UInt32)primaryIfd.Length;
             if (MetaData.ExifIfd != null)
             {
-                exifIfd = IfdComposer.ComposeIfdsection(MetaData.ExifIfd);
+                exifIfd = IfdComposer.ComposeIfdsection(MetaData.ExifIfd, OutputImageMetadataEndian);
             }
 
             MetaData.GpsIfd.Offset = 8 + (UInt32)primaryIfd.Length + (UInt32)exifIfd.Length;
             if (MetaData.GpsIfd != null)
             {
-                gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd);
+                gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd, OutputImageMetadataEndian);
             }
             
             // 1st IFD data (after primary IFD data) should be kept
@@ -159,13 +160,13 @@ namespace NtImageProcessor.MetaData.Composer
             // Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6 + 8);
             Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6); // only EXIF00 should be copiec.
 
-            var endianSection = Util.ToByte(0x4d4d, 2, endian);
+            var endianSection = Util.ToByte(0x4d4d, 2, OutputImageMetadataEndian);
             Array.Copy(endianSection, 0, NewApp1Data, 6, 2);
 
-            var magicNumber = Util.ToByte(0x002A, 2, endian);
+            var magicNumber = Util.ToByte(0x002A, 2, OutputImageMetadataEndian);
             Array.Copy(magicNumber, 0, NewApp1Data, 8, 2);
 
-            var primaryIfdOffset = Util.ToByte(8, 4, endian);
+            var primaryIfdOffset = Util.ToByte(8, 4, OutputImageMetadataEndian);
             Array.Copy(primaryIfdOffset, 0, NewApp1Data, 10, 4);
             
             Array.Copy(primaryIfd, 0, NewApp1Data, 6 + 8, primaryIfd.Length);
@@ -181,7 +182,7 @@ namespace NtImageProcessor.MetaData.Composer
             Array.Copy(OriginalImage, 0, NewImage, 0, 2 + 2);
 
             // Important note again: App 1 data size is stored in Big endian.
-            var App1SizeData = Util.ToByte((UInt32)NewApp1Data.Length, 2, endian);
+            var App1SizeData = Util.ToByte((UInt32)NewApp1Data.Length, 2, Definitions.Endian.Big);
             Array.Copy(App1SizeData, 0, NewImage, 4, 2);
 
             // After that, copy App1 data to new image.

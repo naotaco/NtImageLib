@@ -17,6 +17,7 @@ namespace NtImageProcessor.MetaData
 
             var exif = new JpegMetaData();
 
+            // Out of meta data sections are in Big endian.
             var endian = Definitions.Endian.Big;
 
             // check SOI, Start of image marker.
