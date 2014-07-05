@@ -50,10 +50,12 @@ namespace NtImageProcessor.MetaData
             if (Util.GetUIntValue(App1Data, 0, 2, Definitions.Endian.Little) == Definitions.TIFF_LITTLE_ENDIAN)
             {
                 MetaDataEndian = Definitions.Endian.Little;
+                Debug.WriteLine("This metadata in Little endian");
             }
             else if (Util.GetUIntValue(App1Data, 0, 2, Definitions.Endian.Little) == Definitions.TIFF_BIG_ENDIAN)
             {
                 MetaDataEndian = Definitions.Endian.Big;
+                Debug.WriteLine("This metadata in Big endian");
             }
             else
             {

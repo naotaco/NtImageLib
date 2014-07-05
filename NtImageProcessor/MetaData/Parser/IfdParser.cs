@@ -35,7 +35,7 @@ namespace NtImageProcessor.MetaData.Parser
             
             for (int i = 0; i < EntryNum; i++)
             {
-                // Debug.WriteLine("--- Entry[" + i + "] ---");
+                Debug.WriteLine("--- Entry[" + i + "] ---");
                 var EntryOrigin = (int)IfdOffset + 2 + i * ENTRY_SIZE;
 
                 var entry = new Entry();
@@ -43,21 +43,21 @@ namespace NtImageProcessor.MetaData.Parser
                 // tag
                 entry.Tag = Util.GetUIntValue(App1Data, EntryOrigin, 2, IfdSectionEndian);
                 var tagTypeName = Util.TagNames[entry.Tag];
-                // Debug.WriteLine("Tag: " + entry.Tag.ToString("X") + " " + tagTypeName);
+                Debug.WriteLine("Tag: " + entry.Tag.ToString("X") + " " + tagTypeName);
 
                 // type
                 var typeValue = Util.GetUIntValue(App1Data, EntryOrigin + 2, 2, IfdSectionEndian);
                 entry.Type = Util.ToEntryType(typeValue);
-                // Debug.WriteLine("Type: " + entry.Type.ToString());
+                Debug.WriteLine("Type: " + entry.Type.ToString());
 
                 // count
                 entry.Count = Util.GetUIntValue(App1Data, EntryOrigin + 4, 4, IfdSectionEndian);
-                // Debug.WriteLine("Count: " + entry.Count);
+                Debug.WriteLine("Count: " + entry.Count);
 
                 var valueSize = 0;
                 valueSize = Util.FindDataSize(entry.Type);
                 var TotalValueSize = valueSize * (int)entry.Count;
-                // Debug.WriteLine("Total value size: " + TotalValueSize);
+                Debug.WriteLine("Total value size: " + TotalValueSize);
 
                 var valueBuff = new byte[TotalValueSize];
 
@@ -69,7 +69,8 @@ namespace NtImageProcessor.MetaData.Parser
                 else
                 {
                     // other cases, actual value is stored in separated area
-                    var EntryValuePointer = (int)Util.GetUIntValue(App1Data, EntryOrigin + 8, 4, IfdSectionEndian);
+                    var EntryValuePointer = (int)Util.GetUIntValue(App1Data, EntryOrigin + 8, 4, IfdSectionEndian); 
+                    Debug.WriteLine("Entry pointer: " + EntryValuePointer.ToString("X"));
 
                     Array.Copy(App1Data, EntryValuePointer, valueBuff, 0, TotalValueSize);
 
@@ -79,9 +80,29 @@ namespace NtImageProcessor.MetaData.Parser
 
                 if (IfdSectionEndian != Entry.InternalEndian)
                 {
-                    Array.Reverse(valueBuff);
+                    // to change endian, each sections should be reversed.
+                    var ReversedValue = new byte[valueBuff.Length];
+                    var valueLength = Util.FindDataSize(entry.Type);
+                    if (valueLength == 8)
+                    {
+                        // for fraction value, each value should be reversed individually
+                        valueLength = 4;
+                    }
+                    var valueNum = valueBuff.Length / valueLength;
+                    for (int j = 0; j < valueNum; j++)
+                    {
+                        var tempValue = new byte[valueLength];
+                        Array.Copy(valueBuff, j * valueLength, tempValue, 0, valueLength);
+                        Array.Reverse(tempValue);
+                        Array.Copy(tempValue, 0, ReversedValue, j * valueLength, valueLength);
+                    }
+                    entry.value = ReversedValue;
                 }
-                entry.value = valueBuff;
+                else
+                {
+                    // if internal endian and target metadata's one is same, no need to reverse.
+                    entry.value = valueBuff;
+                }
                 
                 switch (entry.Type)
                 {
