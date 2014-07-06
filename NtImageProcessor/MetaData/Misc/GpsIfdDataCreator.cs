@@ -1,6 +1,7 @@
 ﻿using NtImageProcessor.MetaData.Structure;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,10 +49,20 @@ namespace NtImageProcessor.MetaData.Misc
                 Type = Entry.EntryType.Rational,
                 Count = 3,
             };
-            var deg = Math.Floor(position.Coordinate.Latitude);
-            var min = Math.Floor((position.Coordinate.Latitude - deg) * 60);
-            var sec = Util.ToRoundUp(((position.Coordinate.Latitude - deg) * 60 - min), 3);
-            LatitudeEntry.DoubleValues = new double[] { deg, min, sec };
+            var LatDeg = Math.Floor(position.Coordinate.Latitude);
+            var LatMin = Math.Floor((position.Coordinate.Latitude - LatDeg) * 60);
+            var LatSec = Util.ToRoundUp(((position.Coordinate.Latitude - LatDeg) * 60 - LatMin) * 60, 2);
+            Debug.WriteLine("Latitude: " + LatDeg + " " + LatMin + " " + LatSec);
+            try
+            {
+                LatitudeEntry.DoubleValues = new double[] { LatDeg, LatMin, LatSec };
+            }
+            catch (OverflowException e)
+            {
+                var sec = Util.ToRoundUp(((position.Coordinate.Latitude - LatDeg) * 60 - LatMin) * 60, 1);
+                Debug.WriteLine("Latitude: " + LatDeg + " " + LatMin + " " + sec);
+                LatitudeEntry.DoubleValues = new double[] { LatDeg, LatMin, sec };
+            }
             gpsIfdData.Entries.Add(LatitudeEntry.Tag, LatitudeEntry);
 
             var LongitudeRef = new Entry()
@@ -80,8 +91,18 @@ namespace NtImageProcessor.MetaData.Misc
             };
             var LonDeg = Math.Floor(position.Coordinate.Longitude);
             var LonMin = Math.Floor((position.Coordinate.Longitude - LonDeg) * 60);
-            var LonSec = Util.ToRoundUp(((position.Coordinate.Longitude - LonDeg) * 60 - LonMin), 3);
-            Longitude.DoubleValues = new double[] { LonDeg, LonMin, LonSec };
+            var LonSec = Util.ToRoundUp(((position.Coordinate.Longitude - LonDeg) * 60 - LonMin) * 60, 2);
+            Debug.WriteLine("Longitude: " + LonDeg + " " + LonMin + " " + LonSec);
+            try
+            {
+                Longitude.DoubleValues = new double[] { LonDeg, LonMin, LonSec };
+            }
+            catch (OverflowException e)
+            {
+                var sec = Util.ToRoundUp(((position.Coordinate.Longitude - LonDeg) * 60 - LonMin) * 60, 1);
+                Debug.WriteLine("Longitude: " + LonDeg + " " + LonMin + " " + sec);
+                Longitude.DoubleValues = new double[] { LonDeg, LonMin, sec };
+            }
             gpsIfdData.Entries.Add(Longitude.Tag, Longitude);
 
             var TimeStampEntry = new Entry()

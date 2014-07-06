@@ -148,7 +148,7 @@ namespace NtImageProcessor.MetaData.Misc
 
             var fraction = new UnsignedFraction();
             UInt32 denominator = 1;
-            while (value - System.Math.Floor(value) != 0)
+            while (value - System.Math.Floor(value) != 0 && value < UInt32.MaxValue && denominator < UInt32.MaxValue)
             {
                 value *= 10;
                 denominator *= 10;
@@ -178,7 +178,7 @@ namespace NtImageProcessor.MetaData.Misc
 
             var fraction = new SignedFraction();
             Int32 denominator = 1;
-            while (value - System.Math.Floor(value) != 0)
+            while (value - System.Math.Floor(value) != 0 && value < Int32.MaxValue  && denominator < Int32.MaxValue)
             {
                 value *= 10;
                 denominator *= 10;
@@ -221,7 +221,7 @@ namespace NtImageProcessor.MetaData.Misc
                 i++;
             }
             ret[str.Length] = 0;
-            Debug.WriteLine(str + " " + ret.Length);
+            // Debug.WriteLine(str + " " + ret.Length);
             return ret;
         }
 
@@ -254,7 +254,7 @@ namespace NtImageProcessor.MetaData.Misc
                     IsNegative = true;
                     TempValue[0] &= 0x7F; 
                 }
-                Debug.WriteLine("negative number: " + TempValue[length - 1]);
+                // Debug.WriteLine("negative number: " + TempValue[length - 1]);
             }
             else
             {
@@ -262,7 +262,7 @@ namespace NtImageProcessor.MetaData.Misc
                 {
                     IsNegative = true;
                     TempValue[length - 1] &= 0x7F;
-                    Debug.WriteLine("negative number: " + TempValue[length - 1]);
+                    // Debug.WriteLine("negative number: " + TempValue[length - 1]);
                 }
             }
 
@@ -273,14 +273,14 @@ namespace NtImageProcessor.MetaData.Misc
                 if (endian == Definitions.Endian.Little)
                 {
                     value += (Int32)TempValue[i] << (i * 8);
-                    Debug.WriteLine("value: " + value);
+                    // Debug.WriteLine("value: " + value);
                 }
                 else
                 {
                     value += (Int32)TempValue[i] << ((length - 1 - i) * 8);
                 }
             }
-            Debug.WriteLine("Return " + value.ToString("X"));
+            // Debug.WriteLine("Return " + value.ToString("X"));
             if (IsNegative)
             {
                 value *= -1;

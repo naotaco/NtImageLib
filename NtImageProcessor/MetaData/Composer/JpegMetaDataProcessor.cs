@@ -21,7 +21,7 @@ namespace NtImageProcessor.MetaData.Composer
         public static byte[] SetMetaData(byte[] OriginalImage, JpegMetaData MetaData)
         {
             var OriginalMetaData = JpegMetaDataParser.ParseImage(OriginalImage);
-            Debug.WriteLine("Original image size: " + OriginalImage.Length.ToString("X"));
+            // Debug.WriteLine("Original image size: " + OriginalImage.Length.ToString("X"));
 
             // It seems there's a bug handling little endian jpeg image on WP OS.
             var OutputImageMetadataEndian = Definitions.Endian.Big;
@@ -43,7 +43,7 @@ namespace NtImageProcessor.MetaData.Composer
 
             // Note: App1 size and ID are fixed to Big endian.
             UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4, 2, Definitions.Endian.Big);
-            Debug.WriteLine("Original App1 size: " + OriginalApp1DataSize.ToString("X"));
+            // Debug.WriteLine("Original App1 size: " + OriginalApp1DataSize.ToString("X"));
 
             // 0-5 byte: Exif identify code. E, x, i, f, \0, \0
             // 6-13 byte: TIFF header. endian, 0x002A, Offset to Primary IFD in 4 bytes. generally, 8 is set as the offset.
@@ -92,7 +92,7 @@ namespace NtImageProcessor.MetaData.Composer
                 gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd, OutputImageMetadataEndian);
             }
 
-            Debug.WriteLine("Size fixed. Primary: " + primaryIfd.Length.ToString("X") + " exif: " + exifIfd.Length.ToString("X") + " gps: " + gpsIfd.Length.ToString("X"));
+            // Debug.WriteLine("Size fixed. Primary: " + primaryIfd.Length.ToString("X") + " exif: " + exifIfd.Length.ToString("X") + " gps: " + gpsIfd.Length.ToString("X"));
 
             // after size fixed, set each IFD sections' offset.
             MetaData.PrimaryIfd.Offset = 8; // fixed value             
@@ -155,7 +155,7 @@ namespace NtImageProcessor.MetaData.Composer
             // Exif00 + TIFF header + 3 IFD sections (Primary, Exif, GPS) + 1st IFD data from original data
             // var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length + Original1stIfdData.Length];
             var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length];
-            Debug.WriteLine("New App1 size: " + NewApp1Data.Length.ToString("X"));
+            // Debug.WriteLine("New App1 size: " + NewApp1Data.Length.ToString("X"));
 
             // Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6 + 8);
             Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6); // only EXIF00 should be copiec.
@@ -176,7 +176,7 @@ namespace NtImageProcessor.MetaData.Composer
 
             // Only size of App1 data is different.
             var NewImage = new byte[OriginalImage.Length - OriginalApp1DataSize + NewApp1Data.Length];
-            Debug.WriteLine("New image size: " + NewImage.Length.ToString("X"));
+            // Debug.WriteLine("New image size: " + NewImage.Length.ToString("X"));
 
             // Copy SOI, App1 marker from original.
             Array.Copy(OriginalImage, 0, NewImage, 0, 2 + 2);
@@ -191,7 +191,7 @@ namespace NtImageProcessor.MetaData.Composer
             // At last, copy body from original image.
             Array.Copy(OriginalImage, 2 + 2 + 2 + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - (int)OriginalApp1DataSize);
 
-            Util.DumpByteArray(NewImage,0,  256);
+            // Util.DumpByteArray(NewImage,0,  256);
 
             return NewImage;
         }

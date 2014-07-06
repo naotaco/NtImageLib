@@ -33,7 +33,7 @@ namespace NtImageProcessor.MetaData
             }
 
             UInt32 App1Size = Util.GetUIntValue(image, 4, 2, endian);
-            Debug.WriteLine("App1 size: " + App1Size.ToString("X"));
+            // Debug.WriteLine("App1 size: " + App1Size.ToString("X"));
 
             var exifHeader = Encoding.UTF8.GetString(image, 6, 4);
             if (exifHeader != "Exif")
@@ -50,12 +50,12 @@ namespace NtImageProcessor.MetaData
             if (Util.GetUIntValue(App1Data, 0, 2, Definitions.Endian.Little) == Definitions.TIFF_LITTLE_ENDIAN)
             {
                 MetaDataEndian = Definitions.Endian.Little;
-                Debug.WriteLine("This metadata in Little endian");
+                // Debug.WriteLine("This metadata in Little endian");
             }
             else if (Util.GetUIntValue(App1Data, 0, 2, Definitions.Endian.Little) == Definitions.TIFF_BIG_ENDIAN)
             {
                 MetaDataEndian = Definitions.Endian.Big;
-                Debug.WriteLine("This metadata in Big endian");
+                // Debug.WriteLine("This metadata in Big endian");
             }
             else
             {
@@ -69,24 +69,24 @@ namespace NtImageProcessor.MetaData
 
             // find out a pointer to 1st IFD
             var PrimaryIfdPointer = Util.GetUIntValue(App1Data, 4, 4, MetaDataEndian);
-            Debug.WriteLine("Primary IFD pointer: " + PrimaryIfdPointer);
+            // Debug.WriteLine("Primary IFD pointer: " + PrimaryIfdPointer);
 
             // parse primary (0th) IFD section
             exif.PrimaryIfd = Parser.IfdParser.ParseIfd(App1Data, PrimaryIfdPointer, MetaDataEndian);
-            Debug.WriteLine("Primary offset: " + exif.PrimaryIfd.Offset + " length: " + exif.PrimaryIfd.Length + " next ifd: " + exif.PrimaryIfd.NextIfdPointer);
+            // Debug.WriteLine("Primary offset: " + exif.PrimaryIfd.Offset + " length: " + exif.PrimaryIfd.Length + " next ifd: " + exif.PrimaryIfd.NextIfdPointer);
 
             // parse Exif IFD section
             if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
             {
                 exif.ExifIfd = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIfd.Entries[Definitions.EXIF_IFD_POINTER_TAG].UIntValues[0], MetaDataEndian);
-                Debug.WriteLine("Exif offset: " + exif.ExifIfd.Offset + " length: " + exif.ExifIfd.Length);
+                // Debug.WriteLine("Exif offset: " + exif.ExifIfd.Offset + " length: " + exif.ExifIfd.Length);
             }
 
             // parse GPS data.
             if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
             {
                 exif.GpsIfd = Parser.IfdParser.ParseIfd(App1Data, exif.PrimaryIfd.Entries[Definitions.GPS_IFD_POINTER_TAG].UIntValues[0], MetaDataEndian);
-                Debug.WriteLine("GPS offset: " + exif.GpsIfd.Offset + " length: " + exif.GpsIfd.Length);
+                // Debug.WriteLine("GPS offset: " + exif.GpsIfd.Offset + " length: " + exif.GpsIfd.Length);
             }
 
             return exif;

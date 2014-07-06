@@ -101,8 +101,8 @@ namespace NtImageProcessorTest.MetaData.Misc
             }
         }
 
-        private readonly double[] TestDoubleValues = new double[] { 0, 0.1, 2.1, 2435.324 };
-        private readonly double[] TestNegativeDoubleValues = new double[] { -100, -10.322222, -1, -0.2, };
+        private readonly double[] TestDoubleValues = new double[] { 0, 0.1, 2.1, 60.123456, 68.765753, 17.926137, 99,916145, 2435.324 };
+        private readonly double[] TestNegativeDoubleValues = new double[] { -100, -60.82, -59.2, -3.4465, -1, -0.2, };
 
         [TestMethod]
         public void EntryDoubleIOTest()

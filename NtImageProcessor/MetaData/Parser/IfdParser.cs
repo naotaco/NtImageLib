@@ -26,7 +26,7 @@ namespace NtImageProcessor.MetaData.Parser
             ifd.Offset = IfdOffset;
             var entries = new Dictionary<UInt32, Entry>();
             var EntryNum = Util.GetUIntValue(App1Data, (int)IfdOffset, 2, IfdSectionEndian);
-            Debug.WriteLine("Entry num: " + EntryNum);
+            // Debug.WriteLine("Entry num: " + EntryNum);
 
             ifd.NextIfdPointer = Util.GetUIntValue(App1Data, (int)IfdOffset + 2 + (int)EntryNum * ENTRY_SIZE, 4, IfdSectionEndian);
 
@@ -35,7 +35,7 @@ namespace NtImageProcessor.MetaData.Parser
             
             for (int i = 0; i < EntryNum; i++)
             {
-                Debug.WriteLine("--- Entry[" + i + "] ---");
+                // Debug.WriteLine("--- Entry[" + i + "] ---");
                 var EntryOrigin = (int)IfdOffset + 2 + i * ENTRY_SIZE;
 
                 var entry = new Entry();
@@ -43,21 +43,21 @@ namespace NtImageProcessor.MetaData.Parser
                 // tag
                 entry.Tag = Util.GetUIntValue(App1Data, EntryOrigin, 2, IfdSectionEndian);
                 var tagTypeName = Util.TagNames[entry.Tag];
-                Debug.WriteLine("Tag: " + entry.Tag.ToString("X") + " " + tagTypeName);
+                // Debug.WriteLine("Tag: " + entry.Tag.ToString("X") + " " + tagTypeName);
 
                 // type
                 var typeValue = Util.GetUIntValue(App1Data, EntryOrigin + 2, 2, IfdSectionEndian);
                 entry.Type = Util.ToEntryType(typeValue);
-                Debug.WriteLine("Type: " + entry.Type.ToString());
+                // Debug.WriteLine("Type: " + entry.Type.ToString());
 
                 // count
                 entry.Count = Util.GetUIntValue(App1Data, EntryOrigin + 4, 4, IfdSectionEndian);
-                Debug.WriteLine("Count: " + entry.Count);
+                // Debug.WriteLine("Count: " + entry.Count);
 
                 var valueSize = 0;
                 valueSize = Util.FindDataSize(entry.Type);
                 var TotalValueSize = valueSize * (int)entry.Count;
-                Debug.WriteLine("Total value size: " + TotalValueSize);
+                // Debug.WriteLine("Total value size: " + TotalValueSize);
 
                 var valueBuff = new byte[TotalValueSize];
 
@@ -70,7 +70,7 @@ namespace NtImageProcessor.MetaData.Parser
                 {
                     // other cases, actual value is stored in separated area
                     var EntryValuePointer = (int)Util.GetUIntValue(App1Data, EntryOrigin + 8, 4, IfdSectionEndian); 
-                    Debug.WriteLine("Entry pointer: " + EntryValuePointer.ToString("X"));
+                    // Debug.WriteLine("Entry pointer: " + EntryValuePointer.ToString("X"));
 
                     Array.Copy(App1Data, EntryValuePointer, valueBuff, 0, TotalValueSize);
 
@@ -107,20 +107,20 @@ namespace NtImageProcessor.MetaData.Parser
                 switch (entry.Type)
                 {
                     case Entry.EntryType.Ascii:
-                        Debug.WriteLine("value: " + entry.StringValue + Environment.NewLine + Environment.NewLine);
-                        Debug.WriteLine(" ");
+                        // Debug.WriteLine("value: " + entry.StringValue + Environment.NewLine + Environment.NewLine);
+                        // Debug.WriteLine(" ");
                         break;
                     case Entry.EntryType.Byte:
                     case Entry.EntryType.Undefined:
                         if (entry.Tag == 0x927C)
                         {
-                            Debug.WriteLine("Maker note is too long to print.");
+                            // Debug.WriteLine("Maker note is too long to print.");
                         }
                         else
                         {
                             foreach (int val in entry.UIntValues)
                             {
-                                Debug.WriteLine("value: " + val.ToString("X"));
+                                // Debug.WriteLine("value: " + val.ToString("X"));
                             }
                         }
                         break;
@@ -130,14 +130,14 @@ namespace NtImageProcessor.MetaData.Parser
                     case Entry.EntryType.SLong:
                         foreach (int val in entry.UIntValues)
                         {
-                            Debug.WriteLine("value: " + val);
+                            // Debug.WriteLine("value: " + val);
                         }
                         break;
                     case Entry.EntryType.Rational:
                     case Entry.EntryType.SRational:
                         foreach (double val in entry.DoubleValues)
                         {
-                            Debug.WriteLine("value: " + val);
+                            // Debug.WriteLine("value: " + val);
                         }
                         break;
                     default:

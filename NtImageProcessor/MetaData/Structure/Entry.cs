@@ -112,7 +112,6 @@ namespace NtImageProcessor.MetaData.Structure
                 var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
                 for (int i = 0; i < value.Length; i++)
                 {
-                    Debug.WriteLine("value: " + value[i]);
                     var v = Util.ToByte(value[i], Util.FindDataSize(this.Type), InternalEndian);
                     Array.Copy(v, 0, newValue, i * Util.FindDataSize(this.Type), v.Length);
                 }
@@ -220,6 +219,8 @@ namespace NtImageProcessor.MetaData.Structure
         /// Get/set double values.
         /// This property supports only Rational and SRational types;
         /// specify its type before setting.
+        /// This value supports limited digits due to meta data format and poor algorithm.
+        /// When it throws OverflowException, please round down the value before storing it to about 5 digits.
         /// </summary>
         public double[] DoubleValues
         {
