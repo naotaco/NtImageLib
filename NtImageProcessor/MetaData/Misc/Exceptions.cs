@@ -19,4 +19,13 @@ namespace NtImageProcessor.MetaData.Misc
         public UnsupportedFileFormatException(String message)
             : base(message) { }            
     }
+
+    public class GpsInformationAlreadyExistsException : Exception
+    {
+        public GpsInformationAlreadyExistsException() { }
+
+        public GpsInformationAlreadyExistsException(String message)
+            : base(message)
+        { }
+    }
 }

@@ -12,7 +12,8 @@ namespace NtImageProcessor.MetaData.Composer
     public static class JpegMetaDataProcessor
     {
         /// <summary>
-        /// Set exif data to Jpeg file.
+        /// Set exif data to Jpeg file. 
+        /// Mess of this library; everything are caused by crazy Exif format.
         /// Note that this function overwrites ALL Exif data in the given image.
         /// TODO: Support stream in this class.
         /// </summary>
