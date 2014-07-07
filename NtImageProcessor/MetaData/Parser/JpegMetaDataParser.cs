@@ -3,6 +3,7 @@ using NtImageProcessor.MetaData.Structure;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,14 +11,17 @@ using System.Threading.Tasks;
 namespace NtImageProcessor.MetaData
 {
     public static class JpegMetaDataParser
-    {               
+    {              
+        /// <summary>
+        /// Parse jpeg image and returns it's metadata as structure.
+        /// </summary>
+        /// <param name="image">Jpeg file as byte array.</param>
+        /// <returns>All metadata.</returns>
         public static JpegMetaData ParseImage(byte[] image)
         {
             Debug.WriteLine("ParseImage start. image length: " + image.Length);
 
-            var exif = new JpegMetaData();
-
-            // Out of meta data sections are in Big endian.
+            // Other than meta data sections are in Big endian.
             var endian = Definitions.Endian.Big;
 
             // check SOI, Start of image marker.
@@ -41,9 +45,60 @@ namespace NtImageProcessor.MetaData
                 throw new UnsupportedFileFormatException("Can't fine \"Exif\" mark. value: " + exifHeader);
             }
 
-            byte[] App1Data = new Byte[App1Size];
-            exif.App1Data = App1Data;
+            var App1Data = new byte[App1Size];
             Array.Copy(image, (int)Definitions.APP1_OFFSET, App1Data, 0, (int)App1Size);
+            return ParseApp1Data(App1Data);
+        }
+
+        /// <summary>
+        /// Parse meta data in given image
+        /// </summary>
+        /// <param name="image">Jpeg file as stream</param>
+        /// <returns>All meta data.</returns>
+        public static JpegMetaData ParseImage(Stream image)
+        {
+            Debug.WriteLine("ParseImage start.");
+            // Other than meta data sections are in Big endian.
+            var endian = Definitions.Endian.Big;
+
+            var soiMarker = new byte[2];
+            image.Read(soiMarker, 0, 2);
+            var app1Marker = new byte[2];
+            image.Read(app1Marker, 0, 2);
+            var app1sizeData = new byte[2];
+            image.Read(app1sizeData, 0, 2);
+
+            if (Util.GetUIntValue(soiMarker, 0, 2, endian) != Definitions.JPEG_SOI_MARKER ||
+                Util.GetUIntValue(app1Marker, 0, 2, endian) != Definitions.APP1_MARKER)
+            {
+                throw new UnsupportedFileFormatException("SOI marker or app1 marker is wrong..");
+            }
+
+            var App1Size = Util.GetUIntValue(app1sizeData, 0, 2, endian);
+
+            var exifHeader = new byte[6];
+            image.Read(exifHeader, 0, 6);
+            Util.DumpByteArrayAll(exifHeader);
+            if (Encoding.UTF8.GetString(exifHeader, 0, 4) != "Exif")
+            {
+                throw new UnsupportedFileFormatException("Couldn't find \"Exif\" mark.");
+            }
+
+            var App1Data = new byte[App1Size];
+            image.Read(App1Data, 0, (int)App1Size);
+            return ParseApp1Data(App1Data);
+        }
+
+        /// <summary>
+        /// Parse given data, App1 section data.
+        /// </summary>
+        /// <param name="App1Data">byte array of app1 data which starts from TIFF header.</param>
+        /// <returns>all meta data.</returns>
+        private static JpegMetaData ParseApp1Data(byte[] App1Data)
+        {
+
+            var exif = new JpegMetaData();
+            exif.App1Data = App1Data;
 
             // Check TIFF header.
             var MetaDataEndian = Definitions.Endian.Little;
@@ -91,12 +146,5 @@ namespace NtImageProcessor.MetaData
 
             return exif;
         }
-
-        public static byte[] SetExifData(JpegMetaData e)
-        {
-            return null;
-
-        }
-        
     }
 }

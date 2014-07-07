@@ -35,7 +35,7 @@ namespace NtImageProcessor.MetaData.Parser
             
             for (int i = 0; i < EntryNum; i++)
             {
-                // Debug.WriteLine("--- Entry[" + i + "] ---");
+                Debug.WriteLine("--- Entry[" + i + "] ---");
                 var EntryOrigin = (int)IfdOffset + 2 + i * ENTRY_SIZE;
 
                 var entry = new Entry();
@@ -107,8 +107,8 @@ namespace NtImageProcessor.MetaData.Parser
                 switch (entry.Type)
                 {
                     case Entry.EntryType.Ascii:
-                        // Debug.WriteLine("value: " + entry.StringValue + Environment.NewLine + Environment.NewLine);
-                        // Debug.WriteLine(" ");
+                        Debug.WriteLine("value: " + entry.StringValue + Environment.NewLine + Environment.NewLine);
+                        Debug.WriteLine(" ");
                         break;
                     case Entry.EntryType.Byte:
                     case Entry.EntryType.Undefined:
@@ -130,14 +130,14 @@ namespace NtImageProcessor.MetaData.Parser
                     case Entry.EntryType.SLong:
                         foreach (int val in entry.UIntValues)
                         {
-                            // Debug.WriteLine("value: " + val);
+                            Debug.WriteLine("value: " + val);
                         }
                         break;
                     case Entry.EntryType.Rational:
                     case Entry.EntryType.SRational:
                         foreach (double val in entry.DoubleValues)
                         {
-                            // Debug.WriteLine("value: " + val);
+                            Debug.WriteLine("value: " + val);
                         }
                         break;
                     default:

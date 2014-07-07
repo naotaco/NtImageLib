@@ -14,6 +14,7 @@ namespace NtImageProcessor.MetaData.Composer
         /// <summary>
         /// Set exif data to Jpeg file.
         /// Note that this function overwrites ALL Exif data in the given image.
+        /// TODO: Support stream in this class.
         /// </summary>
         /// <param name="OriginalImage">Target image</param>
         /// <param name="MetaData">An Exif data which will be added to the image.</param>
