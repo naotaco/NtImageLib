@@ -27,7 +27,7 @@ namespace NtImageProcessor.MetaData
             // parse given image first
             var exif = JpegMetaDataParser.ParseImage(image);
 
-            if (exif.PrimaryIfd.Entries.ContainsKey(0x8825))
+            if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
             {
                 Debug.WriteLine("This image contains GPS information. Return.");
                 throw new GpsInformationAlreadyExistsException("This image contains GPS information.");
@@ -54,7 +54,7 @@ namespace NtImageProcessor.MetaData
 
             // parse given image first
             var exif = JpegMetaDataParser.ParseImage(stream);
-            if (exif.PrimaryIfd.Entries.ContainsKey(0x8825))
+            if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
             {
                 Debug.WriteLine("This image contains GPS information. Return.");
                 throw new GpsInformationAlreadyExistsException("This image contains GPS information.");

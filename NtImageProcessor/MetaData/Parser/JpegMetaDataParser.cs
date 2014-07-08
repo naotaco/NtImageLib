@@ -47,7 +47,9 @@ namespace NtImageProcessor.MetaData
 
             var App1Data = new byte[App1Size];
             Array.Copy(image, (int)Definitions.APP1_OFFSET, App1Data, 0, (int)App1Size);
-            return ParseApp1Data(App1Data);
+            var metadata = ParseApp1Data(App1Data);
+            metadata.BodyLength = image.Length - App1Size;
+            return metadata;
         }
 
         /// <summary>
@@ -86,7 +88,9 @@ namespace NtImageProcessor.MetaData
 
             var App1Data = new byte[App1Size];
             image.Read(App1Data, 0, (int)App1Size);
-            return ParseApp1Data(App1Data);
+            var metadata = ParseApp1Data(App1Data);
+            metadata.BodyLength = image.Length - image.Position;
+            return metadata;
         }
 
         /// <summary>

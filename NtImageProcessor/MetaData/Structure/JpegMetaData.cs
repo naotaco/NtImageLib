@@ -40,6 +40,11 @@ namespace NtImageProcessor.MetaData.Structure
         /// </summary>
         public byte[] App1Data { get; set; }
 
+        /// <summary>
+        /// Length of body (Other than App1 data) of Jpeg file.
+        /// </summary>
+        public long BodyLength { get; set; }
+
         public JpegMetaData() { }
 
 

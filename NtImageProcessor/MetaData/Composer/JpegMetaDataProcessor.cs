@@ -52,129 +52,7 @@ namespace NtImageProcessor.MetaData.Composer
             var OriginalApp1Data = new byte[OriginalApp1DataSize];
             Array.Copy(OriginalImage, 6, OriginalApp1Data, 0, (int)OriginalApp1DataSize);
 
-            // each pointer sections should be updated later (after each sections' size are fixed).
-
-            if (MetaData.ExifIfd != null && !MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
-            {
-                // Add Exif IFD section's pointer entry as dummy.
-                MetaData.PrimaryIfd.Entries.Add(
-                    Definitions.EXIF_IFD_POINTER_TAG, 
-                    new Entry() { 
-                        Tag = Definitions.EXIF_IFD_POINTER_TAG,
-                        Type = Entry.EntryType.Long,
-                        Count = 1, 
-                        value = new byte[] { 0, 0, 0, 0 } 
-                    });
-            }
-
-            if (MetaData.GpsIfd != null && !MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
-            {
-                // Add GPS IFD section's pointer entry as dummy
-                MetaData.PrimaryIfd.Entries.Add(
-                    Definitions.GPS_IFD_POINTER_TAG,
-                    new Entry()
-                    {
-                        Tag = Definitions.GPS_IFD_POINTER_TAG,
-                        Type = Entry.EntryType.Long,
-                        Count = 1,
-                        value = new byte[] { 0, 0, 0, 0 }
-                    });
-            }
-
-
-            byte[] primaryIfd = IfdComposer.ComposeIfdsection(MetaData.PrimaryIfd, OutputImageMetadataEndian);
-            byte[] exifIfd = new byte[] { };
-            byte[] gpsIfd = new byte[] { };
-            if (MetaData.ExifIfd != null)
-            {
-                exifIfd = IfdComposer.ComposeIfdsection(MetaData.ExifIfd, OutputImageMetadataEndian);
-            }
-            if (MetaData.GpsIfd != null)
-            {
-                gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd, OutputImageMetadataEndian);
-            }
-
-            // Debug.WriteLine("Size fixed. Primary: " + primaryIfd.Length.ToString("X") + " exif: " + exifIfd.Length.ToString("X") + " gps: " + gpsIfd.Length.ToString("X"));
-
-            // after size fixed, set each IFD sections' offset.
-            MetaData.PrimaryIfd.Offset = 8; // fixed value             
-
-            // now it's possible to calcurate pointer to Exif/GPS IFD
-            var exifIfdPointer = 8 + primaryIfd.Length;
-            var gpsIfdPointer = 8 + primaryIfd.Length + exifIfd.Length;
-            
-            if (MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
-            {
-                MetaData.PrimaryIfd.Entries.Remove(Definitions.EXIF_IFD_POINTER_TAG);
-            }
-
-            var exifIfdPointerEntry = new Entry()
-                {
-                    Tag = Definitions.EXIF_IFD_POINTER_TAG,
-                    Type = Entry.EntryType.Long,
-                    Count = 1,
-                };
-            exifIfdPointerEntry.UIntValues = new UInt32[] { (UInt32)exifIfdPointer };
-            MetaData.PrimaryIfd.Entries.Add(Definitions.EXIF_IFD_POINTER_TAG, exifIfdPointerEntry);
-
-            if (MetaData.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
-            {
-                MetaData.PrimaryIfd.Entries.Remove(Definitions.GPS_IFD_POINTER_TAG);
-            }
-
-            var gpsIfdPointerEntry = new Entry()
-            {
-                Tag = Definitions.GPS_IFD_POINTER_TAG,
-                Type = Entry.EntryType.Long,
-                Count = 1,
-            };
-            gpsIfdPointerEntry.UIntValues = new UInt32[] { (UInt32)gpsIfdPointer };
-            MetaData.PrimaryIfd.Entries.Add(Definitions.GPS_IFD_POINTER_TAG, gpsIfdPointerEntry);
-
-            var nextIfdPointer = 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length;
-            MetaData.PrimaryIfd.NextIfdPointer = (UInt32)nextIfdPointer;
-
-            // finally, create byte array again
-            primaryIfd = IfdComposer.ComposeIfdsection(MetaData.PrimaryIfd, OutputImageMetadataEndian);
-
-            MetaData.ExifIfd.Offset = 8 + (UInt32)primaryIfd.Length;
-            if (MetaData.ExifIfd != null)
-            {
-                exifIfd = IfdComposer.ComposeIfdsection(MetaData.ExifIfd, OutputImageMetadataEndian);
-            }
-
-            MetaData.GpsIfd.Offset = 8 + (UInt32)primaryIfd.Length + (UInt32)exifIfd.Length;
-            if (MetaData.GpsIfd != null)
-            {
-                gpsIfd = IfdComposer.ComposeIfdsection(MetaData.GpsIfd, OutputImageMetadataEndian);
-            }
-            
-            // 1st IFD data (after primary IFD data) should be kept
-            var Original1stIfdData = new byte[OriginalApp1DataSize - OriginalMetaData.PrimaryIfd.NextIfdPointer];
-            Array.Copy(OriginalApp1Data, (int)OriginalMetaData.PrimaryIfd.NextIfdPointer, Original1stIfdData, 0, Original1stIfdData.Length);
-
-            // Build App1 section. From "Exif\0\0" to end of thumbnail data (1st IFD)
-            // Exif00 + TIFF header + 3 IFD sections (Primary, Exif, GPS) + 1st IFD data from original data
-            var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length + Original1stIfdData.Length];
-            // var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length];
-            // Debug.WriteLine("New App1 size: " + NewApp1Data.Length.ToString("X"));
-
-            // Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6 + 8);
-            Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6); // only EXIF00 should be copied.
-
-            var endianSection = Util.ToByte(0x4d4d, 2, OutputImageMetadataEndian);
-            Array.Copy(endianSection, 0, NewApp1Data, 6, 2);
-
-            var magicNumber = Util.ToByte(0x002A, 2, OutputImageMetadataEndian);
-            Array.Copy(magicNumber, 0, NewApp1Data, 8, 2);
-
-            var primaryIfdOffset = Util.ToByte(8, 4, OutputImageMetadataEndian);
-            Array.Copy(primaryIfdOffset, 0, NewApp1Data, 10, 4);
-            
-            Array.Copy(primaryIfd, 0, NewApp1Data, 6 + 8, primaryIfd.Length);
-            Array.Copy(exifIfd, 0, NewApp1Data, 6 + 8 + primaryIfd.Length, exifIfd.Length);
-            Array.Copy(gpsIfd, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length, gpsIfd.Length);
-            Array.Copy(Original1stIfdData, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length, Original1stIfdData.Length);
+            var NewApp1Data = CreateApp1Data(OriginalMetaData, MetaData, OriginalApp1Data, OutputImageMetadataEndian);
 
             // Only size of App1 data is different.
             var NewImage = new byte[OriginalImage.Length - OriginalApp1DataSize + NewApp1Data.Length];
@@ -196,6 +74,143 @@ namespace NtImageProcessor.MetaData.Composer
             // Util.DumpByteArray(NewImage,0,  256);
 
             return NewImage;
+        }
+
+        /// <summary>
+        /// Create app1 data section in byte array.
+        /// Needs many informations....
+        /// </summary>
+        /// <param name="OriginalMetaData">metadata from original image.</param>
+        /// <param name="NewMetaData">metadata which will be recorded in app1 data section</param>
+        /// <param name="OriginalApp1Data">Original app1 data. Other than Exif meta data will be copied to new one</param>
+        /// <param name="OutputImageMetadataEndian">Endian which will be used in Exif meta data. for WP OS, Big endian is recommended.</param>
+        /// <returns></returns>
+        private static byte[] CreateApp1Data(JpegMetaData OriginalMetaData, JpegMetaData NewMetaData, byte[] OriginalApp1Data, Definitions.Endian OutputImageMetadataEndian)
+        {
+            if (NewMetaData.ExifIfd != null && !NewMetaData.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
+            {
+                // Add Exif IFD section's pointer entry as dummy.
+                NewMetaData.PrimaryIfd.Entries.Add(
+                    Definitions.EXIF_IFD_POINTER_TAG,
+                    new Entry()
+                    {
+                        Tag = Definitions.EXIF_IFD_POINTER_TAG,
+                        Type = Entry.EntryType.Long,
+                        Count = 1,
+                        value = new byte[] { 0, 0, 0, 0 }
+                    });
+            }
+
+            if (NewMetaData.GpsIfd != null && !NewMetaData.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
+            {
+                // Add GPS IFD section's pointer entry as dummy
+                NewMetaData.PrimaryIfd.Entries.Add(
+                    Definitions.GPS_IFD_POINTER_TAG,
+                    new Entry()
+                    {
+                        Tag = Definitions.GPS_IFD_POINTER_TAG,
+                        Type = Entry.EntryType.Long,
+                        Count = 1,
+                        value = new byte[] { 0, 0, 0, 0 }
+                    });
+            }
+
+
+            byte[] primaryIfd = IfdComposer.ComposeIfdsection(NewMetaData.PrimaryIfd, OutputImageMetadataEndian);
+            byte[] exifIfd = new byte[] { };
+            byte[] gpsIfd = new byte[] { };
+            if (NewMetaData.ExifIfd != null)
+            {
+                exifIfd = IfdComposer.ComposeIfdsection(NewMetaData.ExifIfd, OutputImageMetadataEndian);
+            }
+            if (NewMetaData.GpsIfd != null)
+            {
+                gpsIfd = IfdComposer.ComposeIfdsection(NewMetaData.GpsIfd, OutputImageMetadataEndian);
+            }
+
+            // Debug.WriteLine("Size fixed. Primary: " + primaryIfd.Length.ToString("X") + " exif: " + exifIfd.Length.ToString("X") + " gps: " + gpsIfd.Length.ToString("X"));
+
+            // after size fixed, set each IFD sections' offset.
+            NewMetaData.PrimaryIfd.Offset = 8; // fixed value             
+
+            // now it's possible to calcurate pointer to Exif/GPS IFD
+            var exifIfdPointer = 8 + primaryIfd.Length;
+            var gpsIfdPointer = 8 + primaryIfd.Length + exifIfd.Length;
+
+            if (NewMetaData.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
+            {
+                NewMetaData.PrimaryIfd.Entries.Remove(Definitions.EXIF_IFD_POINTER_TAG);
+            }
+
+            var exifIfdPointerEntry = new Entry()
+            {
+                Tag = Definitions.EXIF_IFD_POINTER_TAG,
+                Type = Entry.EntryType.Long,
+                Count = 1,
+            };
+            exifIfdPointerEntry.UIntValues = new UInt32[] { (UInt32)exifIfdPointer };
+            NewMetaData.PrimaryIfd.Entries.Add(Definitions.EXIF_IFD_POINTER_TAG, exifIfdPointerEntry);
+
+            if (NewMetaData.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
+            {
+                NewMetaData.PrimaryIfd.Entries.Remove(Definitions.GPS_IFD_POINTER_TAG);
+            }
+
+            var gpsIfdPointerEntry = new Entry()
+            {
+                Tag = Definitions.GPS_IFD_POINTER_TAG,
+                Type = Entry.EntryType.Long,
+                Count = 1,
+            };
+            gpsIfdPointerEntry.UIntValues = new UInt32[] { (UInt32)gpsIfdPointer };
+            NewMetaData.PrimaryIfd.Entries.Add(Definitions.GPS_IFD_POINTER_TAG, gpsIfdPointerEntry);
+
+            var nextIfdPointer = 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length;
+            NewMetaData.PrimaryIfd.NextIfdPointer = (UInt32)nextIfdPointer;
+
+            // finally, create byte array again
+            primaryIfd = IfdComposer.ComposeIfdsection(NewMetaData.PrimaryIfd, OutputImageMetadataEndian);
+
+            NewMetaData.ExifIfd.Offset = 8 + (UInt32)primaryIfd.Length;
+            if (NewMetaData.ExifIfd != null)
+            {
+                exifIfd = IfdComposer.ComposeIfdsection(NewMetaData.ExifIfd, OutputImageMetadataEndian);
+            }
+
+            NewMetaData.GpsIfd.Offset = 8 + (UInt32)primaryIfd.Length + (UInt32)exifIfd.Length;
+            if (NewMetaData.GpsIfd != null)
+            {
+                gpsIfd = IfdComposer.ComposeIfdsection(NewMetaData.GpsIfd, OutputImageMetadataEndian);
+            }
+
+            // 1st IFD data (after primary IFD data) should be kept
+            var Original1stIfdData = new byte[OriginalApp1Data.Length - OriginalMetaData.PrimaryIfd.NextIfdPointer];
+            Array.Copy(OriginalApp1Data, (int)OriginalMetaData.PrimaryIfd.NextIfdPointer, Original1stIfdData, 0, Original1stIfdData.Length);
+
+            // Build App1 section. From "Exif\0\0" to end of thumbnail data (1st IFD)
+            // Exif00 + TIFF header + 3 IFD sections (Primary, Exif, GPS) + 1st IFD data from original data
+            var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length + Original1stIfdData.Length];
+            // var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length];
+            // Debug.WriteLine("New App1 size: " + NewApp1Data.Length.ToString("X"));
+
+            // Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6 + 8);
+            Array.Copy(OriginalApp1Data, 0, NewApp1Data, 0, 6); // only EXIF00 should be copied.
+
+            var endianSection = Util.ToByte(0x4d4d, 2, OutputImageMetadataEndian);
+            Array.Copy(endianSection, 0, NewApp1Data, 6, 2);
+
+            var magicNumber = Util.ToByte(0x002A, 2, OutputImageMetadataEndian);
+            Array.Copy(magicNumber, 0, NewApp1Data, 8, 2);
+
+            var primaryIfdOffset = Util.ToByte(8, 4, OutputImageMetadataEndian);
+            Array.Copy(primaryIfdOffset, 0, NewApp1Data, 10, 4);
+
+            Array.Copy(primaryIfd, 0, NewApp1Data, 6 + 8, primaryIfd.Length);
+            Array.Copy(exifIfd, 0, NewApp1Data, 6 + 8 + primaryIfd.Length, exifIfd.Length);
+            Array.Copy(gpsIfd, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length, gpsIfd.Length);
+            Array.Copy(Original1stIfdData, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length, Original1stIfdData.Length);
+
+            return NewApp1Data;
         }
     }
 }
