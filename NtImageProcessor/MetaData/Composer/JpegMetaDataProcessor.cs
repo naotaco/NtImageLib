@@ -3,6 +3,7 @@ using NtImageProcessor.MetaData.Structure;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,21 +28,6 @@ namespace NtImageProcessor.MetaData.Composer
 
             // It seems there's a bug handling little endian jpeg image on WP OS.
             var OutputImageMetadataEndian = Definitions.Endian.Big;
-            
-            // All data after this pointer will be kept.
-            var FirstIfdPointer = MetaData.PrimaryIfd.NextIfdPointer;
-
-            // check SOI, Start of image marker.
-            if (Util.GetUIntValue(OriginalImage, 0, 2, Definitions.Endian.Big) != Definitions.JPEG_SOI_MARKER)
-            {
-                throw new UnsupportedFileFormatException("Invalid SOI marker. value: " + Util.GetUIntValue(OriginalImage, 0, 2, Definitions.Endian.Big));
-            }
-
-            // check APP1 maerker
-            if (Util.GetUIntValue(OriginalImage, 2, 2, Definitions.Endian.Big) != Definitions.APP1_MARKER)
-            {
-                throw new UnsupportedFileFormatException("Invalid APP1 marker. value: " + Util.GetUIntValue(OriginalImage, 2, 2, Definitions.Endian.Big));
-            }
 
             // Note: App1 size and ID are fixed to Big endian.
             UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4, 2, Definitions.Endian.Big);
@@ -64,15 +50,72 @@ namespace NtImageProcessor.MetaData.Composer
             // Important note again: App 1 data size is stored in Big endian.
             var App1SizeData = Util.ToByte((UInt32)NewApp1Data.Length, 2, Definitions.Endian.Big);
             Array.Copy(App1SizeData, 0, NewImage, 4, 2);
-
+            
             // After that, copy App1 data to new image.
             Array.Copy(NewApp1Data, 0, NewImage, 6, NewApp1Data.Length);
 
             // At last, copy body from original image.
             Array.Copy(OriginalImage, 2 + 2 + 2 + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - (int)OriginalApp1DataSize);
 
-            // Util.DumpByteArray(NewImage,0,  256);
+            return NewImage;
+        }
 
+
+        public static Stream SetMetaData(Stream OriginalImage, JpegMetaData MetaData)
+        {
+            OriginalImage.Seek(0, SeekOrigin.Begin);
+
+            var OriginalMetaData = JpegMetaDataParser.ParseImage(OriginalImage);
+            var OutputImageMetaDataEndian = Definitions.Endian.Big;
+
+            var endian = Definitions.Endian.Big;
+
+            OriginalImage.Position = 4;
+            var app1sizeData = new byte[2];
+            OriginalImage.Read(app1sizeData, 0, 2);
+
+            var OriginalApp1Size = Util.GetUIntValue(app1sizeData, 0, 2, endian);
+
+            OriginalImage.Position = 6;
+
+            var OriginalApp1Data = new byte[OriginalApp1Size];
+            OriginalImage.Read(OriginalApp1Data, 0, (int)OriginalApp1Size);
+
+            var NewApp1Data = CreateApp1Data(OriginalMetaData, MetaData, OriginalApp1Data, OutputImageMetaDataEndian);
+
+            // first 6 bytes;
+            var NewImageHeader = new byte[6];
+            OriginalImage.Position = 0;
+            OriginalImage.Read(NewImageHeader, 0, 4);
+
+            // Important note again: App 1 data size is stored in Big endian.
+            var App1SizeData = Util.ToByte((UInt32)NewApp1Data.Length, 2, Definitions.Endian.Big);
+            Array.Copy(App1SizeData, 0, NewImageHeader, 4, 2);
+
+            Util.DumpByteArrayAll(NewImageHeader);
+
+            var NewImage = new MemoryStream();
+            NewImage.Write(NewImageHeader, 0, 6);
+
+            NewImage.Write(NewApp1Data, 0, NewApp1Data.Length);
+
+            // forward pointer to start position of original body data
+            OriginalImage.Position = 6 + OriginalApp1Size;
+
+            // Copy all other data from original image.
+            int BufSize = 4096;
+            byte[] buffer = new byte[BufSize];
+            int numBytes;
+            int count = 0;
+            while ((numBytes = OriginalImage.Read(buffer, 0, BufSize)) > 0)
+            {
+                NewImage.Write(buffer, 0, numBytes);
+                count += numBytes;
+            }
+
+            NewImage.Seek(0, SeekOrigin.Begin);
+
+            // Debug.WriteLine("image size: " + NewImage.Length);
             return NewImage;
         }
 
@@ -87,6 +130,7 @@ namespace NtImageProcessor.MetaData.Composer
         /// <returns></returns>
         private static byte[] CreateApp1Data(JpegMetaData OriginalMetaData, JpegMetaData NewMetaData, byte[] OriginalApp1Data, Definitions.Endian OutputImageMetadataEndian)
         {
+
             if (NewMetaData.ExifIfd != null && !NewMetaData.PrimaryIfd.Entries.ContainsKey(Definitions.EXIF_IFD_POINTER_TAG))
             {
                 // Add Exif IFD section's pointer entry as dummy.

@@ -59,6 +59,8 @@ namespace NtImageProcessor.MetaData
         /// <returns>All meta data.</returns>
         public static JpegMetaData ParseImage(Stream image)
         {
+            image.Seek(0, SeekOrigin.Begin);
+
             Debug.WriteLine("ParseImage start.");
             // Other than meta data sections are in Big endian.
             var endian = Definitions.Endian.Big;

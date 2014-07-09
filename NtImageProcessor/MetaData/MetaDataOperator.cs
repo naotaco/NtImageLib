@@ -45,15 +45,15 @@ namespace NtImageProcessor.MetaData
         /// <summary>
         /// Add geometory information to given image as Exif data.
         /// </summary>
-        /// <param name="stream">Raw data of Jpeg file as a stream.</param>
+        /// <param name="image">Raw data of Jpeg file as a stream.</param>
         /// <param name="position">Geometory information</param>
         /// <returns>Jpeg data with geometory information.</returns>
-        public static Stream AddGeoposition(Stream stream, Geoposition position)
+        public static Stream AddGeoposition(Stream image, Geoposition position)
         {
             Debug.WriteLine("Longitude : " + position.Coordinate.Longitude + " Latitude: " + position.Coordinate.Latitude);
 
             // parse given image first
-            var exif = JpegMetaDataParser.ParseImage(stream);
+            var exif = JpegMetaDataParser.ParseImage(image);
             if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
             {
                 Debug.WriteLine("This image contains GPS information. Return.");
@@ -67,7 +67,7 @@ namespace NtImageProcessor.MetaData
             exif.GpsIfd = gpsIfdData;
 
             // Todo: Add meta data to jpeg file as stream.
-            return stream;
+            return JpegMetaDataProcessor.SetMetaData(image, exif);
         }
     }
 }
