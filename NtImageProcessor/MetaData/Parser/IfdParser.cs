@@ -42,7 +42,12 @@ namespace NtImageProcessor.MetaData.Parser
 
                 // tag
                 entry.Tag = Util.GetUIntValue(App1Data, EntryOrigin, 2, IfdSectionEndian);
-                var tagTypeName = Util.TagNames[entry.Tag];
+
+                var tagTypeName = "Unknown";
+                if (Util.TagNames.ContainsKey(entry.Tag))
+                {
+                    tagTypeName = Util.TagNames[entry.Tag];
+                }
                 // Debug.WriteLine("Tag: " + entry.Tag.ToString("X") + " " + tagTypeName);
 
                 // type
