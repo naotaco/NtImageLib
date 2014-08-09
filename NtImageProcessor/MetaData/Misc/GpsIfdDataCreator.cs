@@ -57,7 +57,7 @@ namespace NtImageProcessor.MetaData.Misc
             {
                 LatitudeEntry.DoubleValues = new double[] { LatDeg, LatMin, LatSec };
             }
-            catch (OverflowException e)
+            catch (OverflowException)
             {
                 var sec = Util.ToRoundUp(((position.Coordinate.Latitude - LatDeg) * 60 - LatMin) * 60, 1);
                 Debug.WriteLine("Latitude: " + LatDeg + " " + LatMin + " " + sec);
@@ -97,7 +97,7 @@ namespace NtImageProcessor.MetaData.Misc
             {
                 Longitude.DoubleValues = new double[] { LonDeg, LonMin, LonSec };
             }
-            catch (OverflowException e)
+            catch (OverflowException)
             {
                 var sec = Util.ToRoundUp(((position.Coordinate.Longitude - LonDeg) * 60 - LonMin) * 60, 1);
                 Debug.WriteLine("Longitude: " + LonDeg + " " + LonMin + " " + sec);
