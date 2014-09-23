@@ -11,7 +11,7 @@ Provides functions to analyze / operate JPEG file in C#.
 
 ### Parser/Builder
 
-JpegMetaDataParser parses metadata in JPEG iamge file simply. 
+JpegMetaDataParser parses metadata in JPEG image file simply. 
 Both of byte array and byte stream are supported as input format.  
 JpegMetaData structure may contains 3 sections(called IFD), Primary, Exif, and GPS.
 Each IFD has a dictionary of Entry with keys.
@@ -54,7 +54,7 @@ exif.GpsIfd = gpsIfdData;
 var newImage = JpegMetaDataProcessor.SetMetaData(image, exif);
 ```
 
-## JPEG iamge analyzer
+## JPEG image analyzer
 
 A class, HistogramCreator supports to show level of each colors.
 
