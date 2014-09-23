@@ -11,6 +11,9 @@ namespace NtImageProcessor
 
         private int shiftBytes;
 
+        /// <summary>
+        /// Used to specify histogram resolution.
+        /// </summary>
         public enum HistogramResolution
         {
             Resolution_256,
@@ -22,6 +25,11 @@ namespace NtImageProcessor
         public int Resolution { get; set; }
         private HistogramResolution histogramResolution;
 
+        /// <summary>
+        /// This action will be called after histogram data has created.
+        /// Arguments contains counts of each colors, Red, Green and Blue.
+        /// Length of the arrays will be the specified resolution, 32, 64, 128 or 256.
+        /// </summary>
         public event Action<int[], int[], int[]> OnHistogramCreated;
 
         public bool IsRunning
@@ -30,6 +38,11 @@ namespace NtImageProcessor
             set;
         }
 
+        /// <summary>
+        /// Initialize with histogram resolution.
+        /// In case 256 is selected, histogram will be 256-level.
+        /// </summary>
+        /// <param name="resolution">Resolution of historgram.</param>
         public HistogramCreator(HistogramResolution resolution)
         {
             histogramResolution = resolution;
@@ -77,6 +90,11 @@ namespace NtImageProcessor
             IsRunning = false;
         }
 
+        /// <summary>
+        /// Start to create histogram. Once it's completed, OnHistogramCreated will be called.
+        /// </summary>
+        /// <param name="source">Source image</param>
+        /// <returns></returns>
         public async Task CreateHistogram(BitmapImage source)
         {
             if (IsRunning)
