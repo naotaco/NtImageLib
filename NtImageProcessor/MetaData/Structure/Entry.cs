@@ -273,7 +273,7 @@ namespace NtImageProcessor.MetaData.Structure
         {
             get
             {
-                return Encoding.UTF8.GetString(value, 0, value.Length);
+                return Encoding.UTF8.GetString(value, 0, value.Length).TrimEnd('\0');
             }
         }
 
