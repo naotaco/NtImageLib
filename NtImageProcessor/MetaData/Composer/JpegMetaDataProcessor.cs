@@ -29,6 +29,15 @@ namespace NtImageProcessor.MetaData.Composer
             // It seems there's a bug handling little endian jpeg image on WP OS.
             var OutputImageMetadataEndian = Definitions.Endian.Big;
 
+            var App0Offset = 0;
+
+            if (Util.GetUIntValue(OriginalImage, 2, 2, Definitions.Endian.Big) == Definitions.APP0_MARKER)
+            {
+                App0Offset = 2 + (int)Util.GetUIntValue(OriginalImage, 4, 2, Definitions.Endian.Big);
+                Debug.WriteLine("APP0 marker detected. " + App0Offset);
+                throw new UnsupportedFileFormatException("This method is no longer supported");
+            }
+
             // Note: App1 size and ID are fixed to Big endian.
             UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4, 2, Definitions.Endian.Big);
             // Debug.WriteLine("Original App1 size: " + OriginalApp1DataSize.ToString("X"));
@@ -50,7 +59,7 @@ namespace NtImageProcessor.MetaData.Composer
             // Important note again: App 1 data size is stored in Big endian.
             var App1SizeData = Util.ToByte((UInt32)NewApp1Data.Length, 2, Definitions.Endian.Big);
             Array.Copy(App1SizeData, 0, NewImage, 4, 2);
-            
+
             // After that, copy App1 data to new image.
             Array.Copy(NewApp1Data, 0, NewImage, 6, NewApp1Data.Length);
 
@@ -59,7 +68,6 @@ namespace NtImageProcessor.MetaData.Composer
 
             return NewImage;
         }
-
 
         public static Stream SetMetaData(Stream OriginalImage, JpegMetaData MetaData)
         {
@@ -70,13 +78,25 @@ namespace NtImageProcessor.MetaData.Composer
 
             var endian = Definitions.Endian.Big;
 
-            OriginalImage.Position = 4;
+            OriginalImage.Position = 2;
+            var FirstMarker = new byte[2];
+            OriginalImage.Read(FirstMarker, 0, 2);
+            var App0Offset = 0;
+            if (Util.GetUIntValue(FirstMarker, 0, 2, endian) == Definitions.APP0_MARKER)
+            {
+                var App0SizeData = new byte[2];
+                OriginalImage.Read(App0SizeData, 0, 2);
+                App0Offset = 2 + (int)Util.GetUIntValue(App0SizeData, 0, 2, endian);
+                Debug.WriteLine("Detected APP0 seciton. offset " + App0Offset);
+            }
+
+            OriginalImage.Position = 4 + App0Offset;
             var app1sizeData = new byte[2];
             OriginalImage.Read(app1sizeData, 0, 2);
 
             var OriginalApp1Size = Util.GetUIntValue(app1sizeData, 0, 2, endian);
-
-            OriginalImage.Position = 6;
+            Debug.WriteLine("original app1 size: " + OriginalApp1Size);
+            OriginalImage.Position = 6 + App0Offset;
 
             var OriginalApp1Data = new byte[OriginalApp1Size];
             OriginalImage.Read(OriginalApp1Data, 0, (int)OriginalApp1Size);
@@ -84,9 +104,7 @@ namespace NtImageProcessor.MetaData.Composer
             var NewApp1Data = CreateApp1Data(OriginalMetaData, MetaData, OriginalApp1Data, OutputImageMetaDataEndian);
 
             // first 6 bytes;
-            var NewImageHeader = new byte[6];
-            OriginalImage.Position = 0;
-            OriginalImage.Read(NewImageHeader, 0, 4);
+            var NewImageHeader = new byte[6] { 0xFF, 0xD8, 0xFF, 0xE1, 0x0, 0x0 }; // No APP0 section will be stored on new image.
 
             // Important note again: App 1 data size is stored in Big endian.
             var App1SizeData = Util.ToByte((UInt32)NewApp1Data.Length, 2, Definitions.Endian.Big);
@@ -100,7 +118,7 @@ namespace NtImageProcessor.MetaData.Composer
             NewImage.Write(NewApp1Data, 0, NewApp1Data.Length);
 
             // forward pointer to start position of original body data
-            OriginalImage.Position = 6 + OriginalApp1Size;
+            OriginalImage.Position = 6 + App0Offset + OriginalApp1Size;
 
             // Copy all other data from original image.
             int BufSize = 4096;
@@ -233,7 +251,15 @@ namespace NtImageProcessor.MetaData.Composer
 
             // Build App1 section. From "Exif\0\0" to end of thumbnail data (1st IFD)
             // Exif00 + TIFF header + 3 IFD sections (Primary, Exif, GPS) + 1st IFD data from original data
-            var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length + Original1stIfdData.Length];
+            // new app1 size may overfrow from 0xFFFF bytes. in this case, it should be limited up to 0xFFFF byte.
+            var NewApp1DataSize = Math.Min(0xFFFF, 6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length + Original1stIfdData.Length);
+            var NewApp1DataOverflowSize = 0;
+            if (NewApp1DataSize == 0xFFFF)
+            {
+                NewApp1DataOverflowSize = (6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length + Original1stIfdData.Length) - 0xFFFF;
+                Debug.WriteLine("App1 overflow size: " + NewApp1DataOverflowSize);
+            }
+            var NewApp1Data = new byte[NewApp1DataSize];
             // var NewApp1Data = new byte[6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length];
             // Debug.WriteLine("New App1 size: " + NewApp1Data.Length.ToString("X"));
 
@@ -252,7 +278,7 @@ namespace NtImageProcessor.MetaData.Composer
             Array.Copy(primaryIfd, 0, NewApp1Data, 6 + 8, primaryIfd.Length);
             Array.Copy(exifIfd, 0, NewApp1Data, 6 + 8 + primaryIfd.Length, exifIfd.Length);
             Array.Copy(gpsIfd, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length, gpsIfd.Length);
-            Array.Copy(Original1stIfdData, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length, Original1stIfdData.Length);
+            Array.Copy(Original1stIfdData, 0, NewApp1Data, 6 + 8 + primaryIfd.Length + exifIfd.Length + gpsIfd.Length, Original1stIfdData.Length - NewApp1DataOverflowSize);
 
             return NewApp1Data;
         }
