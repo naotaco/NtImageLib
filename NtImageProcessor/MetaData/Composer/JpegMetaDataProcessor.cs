@@ -35,17 +35,17 @@ namespace NtImageProcessor.MetaData.Composer
             {
                 App0Offset = 2 + (int)Util.GetUIntValue(OriginalImage, 4, 2, Definitions.Endian.Big);
                 Debug.WriteLine("APP0 marker detected. " + App0Offset);
-                throw new UnsupportedFileFormatException("This method is no longer supported");
+                Debug.WriteLine("*** this method with APP0 section is not tested. ***");
             }
 
             // Note: App1 size and ID are fixed to Big endian.
-            UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4, 2, Definitions.Endian.Big);
+            UInt32 OriginalApp1DataSize = Util.GetUIntValue(OriginalImage, 4 + App0Offset, 2, Definitions.Endian.Big);
             // Debug.WriteLine("Original App1 size: " + OriginalApp1DataSize.ToString("X"));
 
             // 0-5 byte: Exif identify code. E, x, i, f, \0, \0
             // 6-13 byte: TIFF header. endian, 0x002A, Offset to Primary IFD in 4 bytes. generally, 8 is set as the offset.
             var OriginalApp1Data = new byte[OriginalApp1DataSize];
-            Array.Copy(OriginalImage, 6, OriginalApp1Data, 0, (int)OriginalApp1DataSize);
+            Array.Copy(OriginalImage, 6 + App0Offset, OriginalApp1Data, 0, (int)OriginalApp1DataSize);
 
             var NewApp1Data = CreateApp1Data(OriginalMetaData, MetaData, OriginalApp1Data, OutputImageMetadataEndian);
 
@@ -53,8 +53,9 @@ namespace NtImageProcessor.MetaData.Composer
             var NewImage = new byte[OriginalImage.Length - OriginalApp1DataSize + NewApp1Data.Length];
             // Debug.WriteLine("New image size: " + NewImage.Length.ToString("X"));
 
-            // Copy SOI, App1 marker from original.
-            Array.Copy(OriginalImage, 0, NewImage, 0, 2 + 2);
+            // Copy SOI, App1 marker
+            var newImageHeader = new byte[4] { 0xFF, 0xD8, 0xFF, 0xE1 };
+            Array.Copy(newImageHeader, 0, NewImage, 0, 2 + 2);
 
             // Important note again: App 1 data size is stored in Big endian.
             var App1SizeData = Util.ToByte((UInt32)NewApp1Data.Length, 2, Definitions.Endian.Big);
@@ -64,7 +65,7 @@ namespace NtImageProcessor.MetaData.Composer
             Array.Copy(NewApp1Data, 0, NewImage, 6, NewApp1Data.Length);
 
             // At last, copy body from original image.
-            Array.Copy(OriginalImage, 2 + 2 + 2 + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - (int)OriginalApp1DataSize);
+            Array.Copy(OriginalImage, 2 + 2 + 2 + App0Offset + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - (int)OriginalApp1DataSize);
 
             return NewImage;
         }
