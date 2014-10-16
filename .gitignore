@@ -108,3 +108,8 @@ Backup*/
 UpgradeLog*.XML
 
 .nuget
+
+
+*.jpg
+*.png
+*.JPG
