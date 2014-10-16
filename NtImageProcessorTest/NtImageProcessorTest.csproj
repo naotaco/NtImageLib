@@ -74,8 +74,11 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="LocalizedStrings.cs" />
+    <Compile Include="MetaData\Geotag.cs" />
+    <Compile Include="MetaData\MetaDataOperatorTest.cs" />
     <Compile Include="MetaData\Misc\EntryTest.cs" />
     <Compile Include="MetaData\Misc\UtilTest.cs" />
+    <Compile Include="MetaData\TestFiles.cs" />
     <Compile Include="TestUtil.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="MainPage.xaml.cs">
@@ -113,6 +116,15 @@
     <Content Include="Assets\ApplicationIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\TestImages\image_bigendian_large.jpg" />
+    <Content Include="Assets\TestImages\image_less_tag.jpg" />
+    <Content Include="Assets\TestImages\image_littleendian_large.jpg" />
+    <Content Include="Assets\TestImages\image_negative_value.jpg" />
+    <Content Include="Assets\TestImages\image_png.png" />
+    <Content Include="Assets\TestImages\image_positive_value.jpg" />
+    <Content Include="Assets\TestImages\image_with_app0.jpg" />
+    <Content Include="Assets\TestImages\image_with_geotag.JPG" />
+    <Content Include="Assets\TestImages\image_with_geotag_large.JPG" />
     <Content Include="Assets\Tiles\FlipCycleTileLarge.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
