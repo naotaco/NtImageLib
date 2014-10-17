@@ -19,19 +19,23 @@ namespace NtImageProcessor.MetaData
         /// </summary>
         /// <param name="image">Raw data of Jpeg file</param>
         /// <param name="position">Geometory information</param>
+        /// <param name="overwrite">In case geotag is already exists, it throws GpsInformationAlreadyExistsException by default.
+        ///  To overwrite current one, set true here.</param>
         /// <returns>Jpeg data with geometory information.</returns>
-        public static byte[] AddGeoposition(byte[] image, Geoposition position)
+        public static byte[] AddGeoposition(byte[] image, Geoposition position, bool overwrite = false)
         {
             Debug.WriteLine("Longitude : " + position.Coordinate.Longitude + " Latitude: " + position.Coordinate.Latitude);
 
             // parse given image first
             var exif = JpegMetaDataParser.ParseImage(image);
 
-            if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
+            if (!overwrite && (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG) || exif.GpsIfd != null))
             {
-                Debug.WriteLine("This image contains GPS information. Return.");
+                Debug.WriteLine("This image contains GPS information.");
                 throw new GpsInformationAlreadyExistsException("This image contains GPS information.");
             }
+
+            exif = RemoveGeoinfo(exif);
 
             // Create IFD structure from given GPS info
             var gpsIfdData = GpsIfdDataCreator.CreateGpsIfdData(position);
@@ -48,19 +52,23 @@ namespace NtImageProcessor.MetaData
         /// <param name="image">Raw data of Jpeg file as a stream.
         /// Given stream will be disposed after adding location info.</param>
         /// <param name="position">Geometory information</param>
+        /// /// <param name="overwrite">In case geotag is already exists, it throws GpsInformationAlreadyExistsException by default.
+        ///  To overwrite current one, set true here.</param>
         /// <returns>Jpeg data with geometory information.</returns>
-        public static Stream AddGeoposition(Stream image, Geoposition position)
+        public static Stream AddGeoposition(Stream image, Geoposition position, bool overwrite = false)
         {
             Debug.WriteLine("Longitude : " + position.Coordinate.Longitude + " Latitude: " + position.Coordinate.Latitude);
 
             // parse given image first
             var exif = JpegMetaDataParser.ParseImage(image);
 
-            if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
+            if (!overwrite && (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG) || exif.GpsIfd != null))
             {
-                Debug.WriteLine("This image contains GPS information. Return.");
+                Debug.WriteLine("This image contains GPS information.");
                 throw new GpsInformationAlreadyExistsException("This image contains GPS information.");
             }
+
+            exif = RemoveGeoinfo(exif);
 
             // Create IFD structure from given GPS info
             var gpsIfdData = GpsIfdDataCreator.CreateGpsIfdData(position);
@@ -72,6 +80,21 @@ namespace NtImageProcessor.MetaData
             var newImage = JpegMetaDataProcessor.SetMetaData(image, exif);
             image.Dispose();
             return newImage;
+        }
+
+        /// <summary>
+        /// Remove GPS information from metadata.
+        /// </summary>
+        /// <param name="meta">Metadata with geotag</param>
+        /// <returns></returns>
+        static JpegMetaData RemoveGeoinfo(JpegMetaData meta)
+        {
+            if (meta.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
+            {
+                meta.PrimaryIfd.Entries.Remove(Definitions.GPS_IFD_POINTER_TAG);
+            }
+            meta.GpsIfd = null;
+            return meta;
         }
     }
 }
