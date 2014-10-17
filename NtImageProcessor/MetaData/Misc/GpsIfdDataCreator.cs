@@ -32,13 +32,15 @@ namespace NtImageProcessor.MetaData.Misc
                 Count = 2,
             };
             char latRef;
-            if (position.Coordinate.Latitude > 0)
+            var latitude = position.Coordinate.Latitude;
+            if (latitude > 0)
             {
                 latRef = 'N';
             }
             else
             {
                 latRef = 'S';
+                latitude *= -1;
             }
             LatitudeRefEntry.UIntValues = new UInt32[] { (byte)latRef, 0 };
             gpsIfdData.Entries.Add(LatitudeRefEntry.Tag, LatitudeRefEntry);
@@ -49,9 +51,9 @@ namespace NtImageProcessor.MetaData.Misc
                 Type = Entry.EntryType.Rational,
                 Count = 3,
             };
-            var LatDeg = Math.Floor(position.Coordinate.Latitude);
-            var LatMin = Math.Floor((position.Coordinate.Latitude - LatDeg) * 60);
-            var LatSec = Util.ToRoundUp(((position.Coordinate.Latitude - LatDeg) * 60 - LatMin) * 60, 2);
+            var LatDeg = Math.Floor(latitude);
+            var LatMin = Math.Floor((latitude - LatDeg) * 60);
+            var LatSec = Util.ToRoundUp(((latitude - LatDeg) * 60 - LatMin) * 60, 2);
             Debug.WriteLine("Latitude: " + LatDeg + " " + LatMin + " " + LatSec);
             try
             {
@@ -59,7 +61,7 @@ namespace NtImageProcessor.MetaData.Misc
             }
             catch (OverflowException)
             {
-                var sec = Util.ToRoundUp(((position.Coordinate.Latitude - LatDeg) * 60 - LatMin) * 60, 0);
+                var sec = Util.ToRoundUp(((latitude - LatDeg) * 60 - LatMin) * 60, 0);
                 Debug.WriteLine("Latitude: " + LatDeg + " " + LatMin + " " + sec);
                 LatitudeEntry.DoubleValues = new double[] { LatDeg, LatMin, sec };
             }
@@ -72,6 +74,7 @@ namespace NtImageProcessor.MetaData.Misc
                 Count = 3,
             };
             char lonRef;
+            var longitude = position.Coordinate.Longitude;
             if (position.Coordinate.Longitude > 0)
             {
                 lonRef = 'E';
@@ -79,6 +82,7 @@ namespace NtImageProcessor.MetaData.Misc
             else
             {
                 lonRef = 'W';
+                longitude *= -1;
             }
             LongitudeRef.UIntValues = new UInt32[] { (byte)lonRef, 0 };
             gpsIfdData.Entries.Add(LongitudeRef.Tag, LongitudeRef);
@@ -89,9 +93,9 @@ namespace NtImageProcessor.MetaData.Misc
                 Type = Entry.EntryType.Rational,
                 Count = 3,
             };
-            var LonDeg = Math.Floor(position.Coordinate.Longitude);
-            var LonMin = Math.Floor((position.Coordinate.Longitude - LonDeg) * 60);
-            var LonSec = Util.ToRoundUp(((position.Coordinate.Longitude - LonDeg) * 60 - LonMin) * 60, 2);
+            var LonDeg = Math.Floor(longitude);
+            var LonMin = Math.Floor((longitude - LonDeg) * 60);
+            var LonSec = Util.ToRoundUp(((longitude - LonDeg) * 60 - LonMin) * 60, 2);
             Debug.WriteLine("Longitude: " + LonDeg + " " + LonMin + " " + LonSec);
             try
             {
@@ -99,7 +103,7 @@ namespace NtImageProcessor.MetaData.Misc
             }
             catch (OverflowException)
             {
-                var sec = Util.ToRoundUp(((position.Coordinate.Longitude - LonDeg) * 60 - LonMin) * 60, 0);
+                var sec = Util.ToRoundUp(((longitude - LonDeg) * 60 - LonMin) * 60, 0);
                 Debug.WriteLine("Longitude: " + LonDeg + " " + LonMin + " " + sec);
                 Longitude.DoubleValues = new double[] { LonDeg, LonMin, sec };
             }
