@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+using NtImageProcessor.MetaData.Misc;
 using NtImageProcessor.MetaData.Structure;
 using System;
 using System.Collections.Generic;
@@ -72,6 +73,7 @@ namespace NtImageProcessorTest
                 {
                     var image = new byte[read];
                     Array.Copy(buf, image, read);
+                    myFileStream.Close();
                     return image;
                 }
             }
@@ -103,15 +105,24 @@ namespace NtImageProcessorTest
                 Assert.IsNull(meta1.GpsIfd);
                 Assert.IsNull(meta2.GpsIfd);
             }
-
         }
+
+        public static void IsGpsDataAdded(JpegMetaData original, JpegMetaData added)
+        {
+            if (original.ExifIfd != null && added.ExifIfd != null)
+            {
+                TestUtil.AreEqual(original.ExifIfd, added.ExifIfd, "Exif IFD");
+            }
+            Assert.IsTrue(added.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG));
+            Assert.IsNotNull(added.GpsIfd);
+        }
+        
 
         public static void AreEqual(IfdData data1, IfdData data2, string message)
         {
             message = message + " ";
             Assert.AreEqual(data1.NextIfdPointer, data2.NextIfdPointer, message + "Next IFD pointer");
             Assert.AreEqual(data1.Length, data2.Length, message + "length");
-            Assert.AreEqual(data1.Offset, data2.Offset, message + "offset");
             Assert.AreEqual(data1.Entries.Count, data2.Entries.Count, message + "entry num");
 
         }

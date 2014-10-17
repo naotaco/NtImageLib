@@ -234,15 +234,17 @@ namespace NtImageProcessor.MetaData.Composer
             // finally, create byte array again
             primaryIfd = IfdComposer.ComposeIfdsection(NewMetaData.PrimaryIfd, OutputImageMetadataEndian);
 
-            NewMetaData.ExifIfd.Offset = 8 + (UInt32)primaryIfd.Length;
+            
             if (NewMetaData.ExifIfd != null)
             {
+                NewMetaData.ExifIfd.Offset = 8 + (UInt32)primaryIfd.Length;
                 exifIfd = IfdComposer.ComposeIfdsection(NewMetaData.ExifIfd, OutputImageMetadataEndian);
             }
 
-            NewMetaData.GpsIfd.Offset = 8 + (UInt32)primaryIfd.Length + (UInt32)exifIfd.Length;
+            
             if (NewMetaData.GpsIfd != null)
             {
+                NewMetaData.GpsIfd.Offset = 8 + (UInt32)primaryIfd.Length + (UInt32)exifIfd.Length;
                 gpsIfd = IfdComposer.ComposeIfdsection(NewMetaData.GpsIfd, OutputImageMetadataEndian);
             }
 

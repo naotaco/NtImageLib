@@ -19,16 +19,20 @@ namespace NtImageProcessorTest.MetaData
         {
             foreach (string file in TestFiles.InvalidImages)
             {
-                var stream = TestUtil.GetResourceStream(file);
-                Assert.ThrowsException<UnsupportedFileFormatException>(() =>
+                using (var stream = TestUtil.GetResourceStream(file))
                 {
-                    NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
-                });
-                var array = TestUtil.GetResourceByteArray(file);
-                Assert.ThrowsException<UnsupportedFileFormatException>(() =>
-                {
-                    NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
-                });
+                    Assert.ThrowsException<UnsupportedFileFormatException>(() =>
+                    {
+                        NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
+                    });
+
+                    var array = TestUtil.GetResourceByteArray(file);
+                    Assert.ThrowsException<UnsupportedFileFormatException>(() =>
+                    {
+                        NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
+                    });
+                }
+                GC.Collect();
             }
         }
 
@@ -37,11 +41,14 @@ namespace NtImageProcessorTest.MetaData
         {
             foreach (string file in TestFiles.ValidImages)
             {
-                var stream = TestUtil.GetResourceStream(file);
-                NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
+                using (var stream = TestUtil.GetResourceStream(file))
+                {
+                    NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
 
-                var array = TestUtil.GetResourceByteArray(file);
-                NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
+                    var array = TestUtil.GetResourceByteArray(file);
+                    NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
+                }
+                GC.Collect();
             }
         }
 
@@ -50,13 +57,16 @@ namespace NtImageProcessorTest.MetaData
         {
             foreach (string file in TestFiles.ImagesWithoutGeotag)
             {
-                var stream = TestUtil.GetResourceStream(file);
-                var meta1 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
+                using (var stream = TestUtil.GetResourceStream(file))
+                {
+                    var meta1 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
 
-                var array = TestUtil.GetResourceByteArray(file);
-                var meta2 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
+                    var array = TestUtil.GetResourceByteArray(file);
+                    var meta2 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
 
-                TestUtil.CompareJpegMetaData(meta1, meta2, file, false);
+                    TestUtil.CompareJpegMetaData(meta1, meta2, file, false);
+                }
+                GC.Collect();
             }
         }
 
@@ -65,13 +75,16 @@ namespace NtImageProcessorTest.MetaData
         {
             foreach (string file in TestFiles.ImagesWithoutGeotagAndExiftag)
             {
-                var stream = TestUtil.GetResourceStream(file);
-                var meta1 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
+                using (var stream = TestUtil.GetResourceStream(file))
+                {
+                    var meta1 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
 
-                var array = TestUtil.GetResourceByteArray(file);
-                var meta2 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
+                    var array = TestUtil.GetResourceByteArray(file);
+                    var meta2 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
 
-                TestUtil.CompareJpegMetaData(meta1, meta2, file, false, false);
+                    TestUtil.CompareJpegMetaData(meta1, meta2, file, false, false);
+                }
+                GC.Collect();
             }
         }
 
@@ -80,13 +93,16 @@ namespace NtImageProcessorTest.MetaData
         {
             foreach (string file in TestFiles.GeotagImages)
             {
-                var stream = TestUtil.GetResourceStream(file);
-                var meta1 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
+                using (var stream = TestUtil.GetResourceStream(file))
+                {
+                    var meta1 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(stream);
 
-                var array = TestUtil.GetResourceByteArray(file);
-                var meta2 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
+                    var array = TestUtil.GetResourceByteArray(file);
+                    var meta2 = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(array);
 
-                TestUtil.CompareJpegMetaData(meta1, meta2, file, true);
+                    TestUtil.CompareJpegMetaData(meta1, meta2, file, true);
+                }
+                GC.Collect();
             }
         }
     }
