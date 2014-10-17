@@ -65,7 +65,7 @@ namespace NtImageProcessor.MetaData.Composer
             Array.Copy(NewApp1Data, 0, NewImage, 6, NewApp1Data.Length);
 
             // At last, copy body from original image.
-            Array.Copy(OriginalImage, 2 + 2 + 2 + App0Offset + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - (int)OriginalApp1DataSize);
+            Array.Copy(OriginalImage, 2 + 2 + 2 + App0Offset + (int)OriginalApp1DataSize, NewImage, 2 + 2 + 2 + NewApp1Data.Length, OriginalImage.Length - 2 - 2 - 2 - App0Offset - (int)OriginalApp1DataSize);
 
             return NewImage;
         }
