@@ -141,9 +141,9 @@ namespace NtImageProcessorTest.MetaData.Misc
             { 0x1FF, new byte[]{0,0,1,0xFF}},
             { 0xFFFF, new byte[]{0,0,0xFF, 0xff}},
             { 0x7FFFFFFF, new byte[]{0x7F,0xff, 0xff, 0xff}},
-            { -1, new byte[]{0x0, 0,0,1}},
-            { -0xFFFF, new byte[]{0x0, 0, 0xFF, 0xFF}},
-            { -0x7FFFFFFF, new byte[]{0x7F, 0xFF, 0xFF, 0xFF}},
+            { -1, new byte[]{0xFF, 0xFF,0xFF,0xFF}},
+            { -0xFFFF, new byte[]{0xFF, 0xFF, 0x00, 0x01}},
+            { -0x7FFFFFFF, new byte[]{0x80, 0x00, 0x00, 0x01}},
         };
 
         [TestMethod]
@@ -178,14 +178,14 @@ namespace NtImageProcessorTest.MetaData.Misc
                         }, "Overflow exception in little endian. length: " + length);
                         continue;
                     }
-                    else if (key < -maxNum)
+                    else if (key < -(maxNum + 1))
                     {
-                        Assert.ThrowsException<OverflowException>(() =>
+                        Assert.ThrowsException<InvalidCastException>(() =>
                         {
                             var a = Util.ToByte(key, length, Definitions.Endian.Big);
                         }, "Invalid cast exception");
 
-                        Assert.ThrowsException<OverflowException>(() =>
+                        Assert.ThrowsException<InvalidCastException>(() =>
                         {
                             var a = Util.ToByte(key, length, Definitions.Endian.Little);
                         }, "Invalid cast exception");
@@ -208,19 +208,12 @@ namespace NtImageProcessorTest.MetaData.Misc
                     }
 
                     var expected_big = TestUtil.GetLastElements(IntByteData3[key], length);
-                    if (key < 0)
-                    {
-                        expected_big[0] |= 0x80;
-                    }
                     var actual_big = Util.ToByte(key, length, Definitions.Endian.Big);
                     TestUtil.AreEqual(expected_big, actual_big, "Big endian Int->Byte test. key: " + key);
 
                     var expected_Little = TestUtil.GetLastElements(IntByteData3[key], length);
                     Array.Reverse(expected_Little);
-                    if (key < 0)
-                    {
-                        expected_Little[expected_Little.Length - 1] |= 0x80;
-                    }                    
+
                     var actual_little = Util.ToByte(key, length, Definitions.Endian.Little);
                     TestUtil.AreEqual(expected_Little, actual_little, "Little endian Int->Byte test. key: " + key);
                 }
@@ -298,11 +291,12 @@ namespace NtImageProcessorTest.MetaData.Misc
             {0x7F01, new byte[] {0x7F, 1}},
             {0xFFFF, new byte[] {0,0,0xFF, 0xFF}},
             {0x7FFF0000, new byte[] {0x7F, 0xFF, 0,0}},
-            {-1, new byte[]{0x81}},
-            {-2, new byte[] {0x80, 0x02}},
-            {-0xFF, new byte[]{0x80, 0xFF}},
-            {-0x7FFF, new byte[] {0xFF, 0xFF}},
-            {-0x7FFFFFFF, new byte[]{0xFF, 0xFF, 0xFF, 0xFF}},
+            {-1, new byte[]{0xFF}},
+            {-128, new byte[]{0x80}},
+            {-2, new byte[] {0xFF, 0xFE}},
+            {-0xFF, new byte[]{0xFF, 0x01}},
+            {-0x7FFF, new byte[] {0x80, 0x01}},
+            {-0x7FFFFFFF, new byte[]{0x80, 0x00, 0x00, 0x01}},
         };
 
         [TestMethod]

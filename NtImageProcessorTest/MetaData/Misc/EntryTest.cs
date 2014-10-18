@@ -82,7 +82,7 @@ namespace NtImageProcessorTest.MetaData.Misc
                     {
                         Assert.ThrowsException<OverflowException>(() =>
                         {
-                            entry.IntValues = new Int32[] { value };
+                            entry.SIntValues = new Int32[] { value };
                         });
                         continue;
                     }
@@ -90,13 +90,13 @@ namespace NtImageProcessorTest.MetaData.Misc
                     {
                         Assert.ThrowsException<InvalidCastException>(() =>
                         {
-                            entry.IntValues = new Int32[] { value };
+                            entry.SIntValues = new Int32[] { value };
                         });
                         continue;
                     }
-                    entry.IntValues = new Int32[] { value };
+                    entry.SIntValues = new Int32[] { value };
 
-                    Assert.AreEqual(value, entry.IntValues[0]);
+                    Assert.AreEqual(value, entry.SIntValues[0]);
                 }
             }
         }
@@ -174,11 +174,11 @@ namespace NtImageProcessorTest.MetaData.Misc
                 Count = 1,
                 value = new byte[]{0x7F,0xFF},
             }},
-            { new Int32[]{-0x7FFF,-3},
+            { new Int32[]{-0x7FFF,-4},
                 new Entry(){
                 Type = Entry.EntryType.SShort,
                 Count = 2,
-                value = new byte[]{0xFF,0xFF,0x80,0x03},
+                value = new byte[]{0x80,0x01,0xFF,0xFC},
             }},
             { new Int32[]{0},
                 new Entry(){
@@ -186,17 +186,17 @@ namespace NtImageProcessorTest.MetaData.Misc
                 Count = 1,
                 value = new byte[]{0,0,0,0},
             }},
-            { new Int32[]{0x7FFFFFFF},
+            { new Int32[]{-0x7FFFFFFF},
                 new Entry(){
                 Type = Entry.EntryType.SLong,
                 Count = 1,
-                value = new byte[]{0x7F, 0xFF, 0xFF, 0xFF},
+                value = new byte[]{0x80, 0x00, 0x00, 0x01},
             }},
             { new Int32[]{-0xFF},
                 new Entry(){
                 Type = Entry.EntryType.SLong,
                 Count = 1,
-                value = new byte[]{0x80,0,0,0xFF},
+                value = new byte[]{0xFF,0xFF,0xFF,0x01},
             }},
         };
 
@@ -205,7 +205,7 @@ namespace NtImageProcessorTest.MetaData.Misc
         {
             foreach (Int32[] values in EntryIntByteData.Keys)
             {
-                TestUtil.AreEqual(values, EntryIntByteData[values].IntValues, "0 values 0 : " + values[0]);
+                TestUtil.AreEqual(values, EntryIntByteData[values].SIntValues, "0 values 0 : " + values[0]);
                 Debug.WriteLine("val: " + values[0]);
 
                 var entry = new Entry()
@@ -213,7 +213,7 @@ namespace NtImageProcessorTest.MetaData.Misc
                     Type = EntryIntByteData[values].Type,
                     Count = EntryIntByteData[values].Count,
                 };
-                entry.IntValues = values;
+                entry.SIntValues = values;
 
                 TestUtil.AreEqual(EntryIntByteData[values].value, entry.value, "1 values 0 : " + values[0]);
             }

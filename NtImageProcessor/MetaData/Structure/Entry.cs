@@ -124,7 +124,7 @@ namespace NtImageProcessor.MetaData.Structure
         /// This method stores its value as byte array.
         /// To determin it's size (char, shoft, long), set Type of this class before setting values.
         /// </summary>
-        public Int32[] IntValues
+        public Int32[] SIntValues
         {
             get
             {
@@ -136,7 +136,7 @@ namespace NtImageProcessor.MetaData.Structure
                 }
                 return v;
             }
-            set 
+            set
             {
                 this.Count = (UInt32)value.Length;
                 var newValue = new byte[value.Length * Util.FindDataSize(this.Type)];
@@ -277,10 +277,6 @@ namespace NtImageProcessor.MetaData.Structure
             }
         }
 
-        public Entry()
-        {
-        }
-
-
+        public Entry() { }
     }
 }

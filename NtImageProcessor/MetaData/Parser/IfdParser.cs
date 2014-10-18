@@ -35,7 +35,7 @@ namespace NtImageProcessor.MetaData.Parser
             
             for (int i = 0; i < EntryNum; i++)
             {
-                Debug.WriteLine("--- Entry[" + i + "] ---");
+                // Debug.WriteLine("--- Entry[" + i + "] ---");
                 var EntryOrigin = (int)IfdOffset + 2 + i * ENTRY_SIZE;
 
                 var entry = new Entry();
@@ -48,16 +48,16 @@ namespace NtImageProcessor.MetaData.Parser
                 {
                     tagTypeName = Util.TagNames[entry.Tag];
                 }
-                Debug.WriteLine("Tag: " + entry.Tag.ToString("X") + " " + tagTypeName);
+                // Debug.WriteLine("Tag: " + entry.Tag.ToString("X") + " " + tagTypeName);
 
                 // type
                 var typeValue = Util.GetUIntValue(App1Data, EntryOrigin + 2, 2, IfdSectionEndian);
                 entry.Type = Util.ToEntryType(typeValue);
-                Debug.WriteLine("Type: " + entry.Type.ToString());
+                // Debug.WriteLine("Type: " + entry.Type.ToString());
 
                 // count
                 entry.Count = Util.GetUIntValue(App1Data, EntryOrigin + 4, 4, IfdSectionEndian);
-                Debug.WriteLine("Count: " + entry.Count);
+                // Debug.WriteLine("Count: " + entry.Count);
 
                 var valueSize = 0;
                 valueSize = Util.FindDataSize(entry.Type);
@@ -133,16 +133,19 @@ namespace NtImageProcessor.MetaData.Parser
                     case Entry.EntryType.SShort:
                     case Entry.EntryType.Long:
                     case Entry.EntryType.SLong:
+
+                        // Util.DumpByteArrayAll(entry.value);
                         foreach (int val in entry.UIntValues)
                         {
-                            Debug.WriteLine("value: " + val);
+                            // Debug.WriteLine("value: " + val);
                         }
                         break;
                     case Entry.EntryType.Rational:
                     case Entry.EntryType.SRational:
+                        // Util.DumpByteArrayAll(entry.value);
                         foreach (double val in entry.DoubleValues)
                         {
-                            Debug.WriteLine("value: " + val);
+                            // Debug.WriteLine("value: " + val);
                         }
                         break;
                     default:

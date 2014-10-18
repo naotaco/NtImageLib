@@ -164,5 +164,14 @@ namespace NtImageProcessorTest.MetaData
             }
         }
 
+        [TestMethod]
+        public void NegativeValue()
+        {
+            using (var imageStream = TestUtil.GetResourceStream(TestFiles.ImagesWithNegativeValues[0]))
+            {
+                var meta = NtImageProcessor.MetaData.JpegMetaDataParser.ParseImage(imageStream);
+            }
+        }
+
     }
 }

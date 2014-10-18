@@ -34,8 +34,7 @@ namespace NtImageProcessor.MetaData.Composer
             if (Util.GetUIntValue(OriginalImage, 2, 2, Definitions.Endian.Big) == Definitions.APP0_MARKER)
             {
                 App0Offset = 2 + (int)Util.GetUIntValue(OriginalImage, 4, 2, Definitions.Endian.Big);
-                Debug.WriteLine("APP0 marker detected. " + App0Offset);
-                Debug.WriteLine("*** this method with APP0 section is not tested. ***");
+                // Debug.WriteLine("APP0 marker detected. " + App0Offset);
             }
 
             // Note: App1 size and ID are fixed to Big endian.
@@ -88,7 +87,6 @@ namespace NtImageProcessor.MetaData.Composer
                 var App0SizeData = new byte[2];
                 OriginalImage.Read(App0SizeData, 0, 2);
                 App0Offset = 2 + (int)Util.GetUIntValue(App0SizeData, 0, 2, endian);
-                Debug.WriteLine("Detected APP0 seciton. offset " + App0Offset);
             }
 
             OriginalImage.Position = 4 + App0Offset;
@@ -96,7 +94,6 @@ namespace NtImageProcessor.MetaData.Composer
             OriginalImage.Read(app1sizeData, 0, 2);
 
             var OriginalApp1Size = Util.GetUIntValue(app1sizeData, 0, 2, endian);
-            Debug.WriteLine("original app1 size: " + OriginalApp1Size);
             OriginalImage.Position = 6 + App0Offset;
 
             var OriginalApp1Data = new byte[OriginalApp1Size];

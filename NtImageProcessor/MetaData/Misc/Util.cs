@@ -70,66 +70,37 @@ namespace NtImageProcessor.MetaData.Misc
 
         public static byte[] ToByte(Int32 value, int length, Definitions.Endian endian)
         {
-            if (value > Int32.MaxValue)
-            {
-                throw new OverflowException();
-            }
-            else if (value < Int32.MinValue)
+            if (length < 1 || length > 4)
             {
                 throw new InvalidCastException();
             }
 
-            bool isNegative = false;
-            if (value < 0)
+            var max = (Int64)(Math.Pow(2, (length * 8)) / 2 - 1);
+            var min =  -(max + 1);
+            if (value > max)
             {
-                isNegative = true;
+                throw new OverflowException();
+            }
+            else if (value < min)
+            {
+                throw new InvalidCastException();
             }
 
             var ByteValue = new byte[length];
-            if (isNegative)
+            if (value < 0)
             {
-                ByteValue = ToByte((UInt32)(value * -1), length, endian);
-                // set the highest bit
-                if (endian == Definitions.Endian.Little)
+                ByteValue = ToByte((UInt32)(-value), length, endian);
+                for (int i = 0; i < ByteValue.Length; i++)
                 {
-                    if ((ByteValue[ByteValue.Length - 1] & 0x80) == 0x80)
-                    {
-                        // if the highest bit is already set, it means overflow.
-                        throw new OverflowException();
-                    }
-                    ByteValue[ByteValue.Length - 1] |= 0x80;
+                    ByteValue[i] = (byte)~(ByteValue[i]);
                 }
-                else
-                {
-                    if ((ByteValue[0] & 0x80) == 0x80)
-                    {
-                        // if the highest bit is already set, it means overflow.
-                        throw new OverflowException();
-                    }
-                    ByteValue[0] |= 0x80;
-                }
+                UInt32 temp = Util.GetUIntValue(ByteValue, 0, length, endian) + 1;
+                ByteValue = Util.ToByte(temp, length, endian);
             }
             else
             {
                 ByteValue = ToByte((UInt32)value, length, endian);
-                if (endian == Definitions.Endian.Little)
-                {
-                    if ((ByteValue[ByteValue.Length - 1] & 0x80) == 0x80)
-                    {
-                        // if the highest bit is already set, it means overflow.
-                        throw new OverflowException();
-                    }
-                }
-                else
-                {
-                    if ((ByteValue[0] & 0x80) == 0x80)
-                    {
-                        // if the highest bit is already set, it means overflow.
-                        throw new OverflowException();
-                    }
-                }
             }
-
             return ByteValue;
         }
 
@@ -177,7 +148,7 @@ namespace NtImageProcessor.MetaData.Misc
 
             var fraction = new SignedFraction();
             Int32 denominator = 1;
-            while (value - System.Math.Floor(value) != 0 && value < Int32.MaxValue  && denominator < Int32.MaxValue)
+            while (value - System.Math.Floor(value) != 0 && value < Int32.MaxValue && denominator < Int32.MaxValue)
             {
                 value *= 10;
                 denominator *= 10;
@@ -251,7 +222,6 @@ namespace NtImageProcessor.MetaData.Misc
                 if ((TempValue[0] & 0x80) == 0x80)
                 {
                     IsNegative = true;
-                    TempValue[0] &= 0x7F; 
                 }
                 // Debug.WriteLine("negative number: " + TempValue[length - 1]);
             }
@@ -260,11 +230,17 @@ namespace NtImageProcessor.MetaData.Misc
                 if ((TempValue[length - 1] & 0x80) == 0x80)
                 {
                     IsNegative = true;
-                    TempValue[length - 1] &= 0x7F;
                     // Debug.WriteLine("negative number: " + TempValue[length - 1]);
                 }
             }
 
+            if (IsNegative)
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    TempValue[i] = (byte)~TempValue[i];
+                }
+            }
 
             for (int i = 0; i < length; i++)
             {
@@ -282,7 +258,8 @@ namespace NtImageProcessor.MetaData.Misc
             // Debug.WriteLine("Return " + value.ToString("X"));
             if (IsNegative)
             {
-                value *= -1;
+                value += 1;
+                value = -value;
             }
             return value;
         }

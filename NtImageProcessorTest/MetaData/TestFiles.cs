@@ -27,6 +27,10 @@ namespace NtImageProcessorTest.MetaData
             "image_positive_value.jpg",
         };
 
+        internal static string[] ImagesWithNegativeValues = new string[]{
+            "image_negative_value.jpg", 
+        };
+
         internal static string[] GeotagTargetImages = new string[]{
             "image_negative_value.jpg",
             "image_with_app0.jpg",
