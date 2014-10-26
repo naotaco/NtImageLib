@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+#if WINDOWS_PHONE
 using System.Windows.Media.Imaging;
+#elif NETFX_CORE
+using Windows.UI.Xaml.Media.Imaging;
+using System.Runtime.InteropServices.WindowsRuntime;
+#endif
 
 namespace NtImageProcessor
 {
@@ -95,7 +100,7 @@ namespace NtImageProcessor
         /// </summary>
         /// <param name="source">Source image</param>
         /// <returns></returns>
-        public async Task CreateHistogram(BitmapImage source)
+        public async Task CreateHistogram(WriteableBitmap source)
         {
             if (IsRunning)
             {
@@ -107,18 +112,20 @@ namespace NtImageProcessor
 
             IsRunning = true;
 
-            var writeableBitmap = new WriteableBitmap(source);
-
-            await Task.Run(() => { CalculateHistogram(writeableBitmap); });
+            await Task.Factory.StartNew(() => { CalculateHistogram(source); });
         }
 
         private void CalculateHistogram(WriteableBitmap writableBitmap)
         {
-
+#if WINDOWS_PHONE
+            var pixels = writableBitmap.Pixels;
+#elif NETFX_CORE
+            var pixels = writableBitmap.PixelBuffer.ToArray();
+#endif
             //foreach (int v in writableBitmap.Pixels)
-            for (int i = 0; i < writableBitmap.Pixels.Length; i += 3)
+            for (int i = 0; i < pixels.Length; i += 3)
             {
-                int value = writableBitmap.Pixels[i];
+                int value = pixels[i];
 
                 int b = (value & 0xFF);
                 value = value >> 8;
@@ -137,16 +144,16 @@ namespace NtImageProcessor
                 green[g]++;
                 blue[b]++;
             }
-            
+
             // normalize values.
-            
+
             for (int i = 0; i < Resolution; i++)
             {
                 red[i] = red[i] >> 4;
                 green[i] = green[i] >> 4;
                 blue[i] = blue[i] >> 4;
             }
-            
+
             if (OnHistogramCreated != null)
             {
                 OnHistogramCreated(red, green, blue);
