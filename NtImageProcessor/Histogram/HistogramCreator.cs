@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 #if WINDOWS_PHONE
 using System.Windows.Media.Imaging;
-#elif NETFX_CORE
+#elif WINDOWS_PHONE_APP||WINDOWS_APP||NETFX_CORE
 using Windows.UI.Xaml.Media.Imaging;
 using System.Runtime.InteropServices.WindowsRuntime;
 #endif
@@ -119,7 +119,7 @@ namespace NtImageProcessor
         {
 #if WINDOWS_PHONE
             var pixels = writableBitmap.Pixels;
-#elif NETFX_CORE
+#elif WINDOWS_PHONE_APP||WINDOWS_APP||NETFX_CORE
             var pixels = writableBitmap.PixelBuffer.ToArray();
 #endif
             //foreach (int v in writableBitmap.Pixels)
