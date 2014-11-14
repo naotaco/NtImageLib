@@ -32,7 +32,11 @@ namespace NtImageProcessor.MetaData.Misc
                 Count = 2,
             };
             char latRef;
+#if WINDOWS_APP
+            var latitude = position.Coordinate.Point.Position.Latitude;
+#elif WINDOWS_PHONE
             var latitude = position.Coordinate.Latitude;
+#endif
             if (latitude > 0)
             {
                 latRef = 'N';
@@ -74,8 +78,12 @@ namespace NtImageProcessor.MetaData.Misc
                 Count = 3,
             };
             char lonRef;
+#if WINDOWS_APP
+            var longitude = position.Coordinate.Point.Position.Longitude;
+#elif WINDOWS_PHONE
             var longitude = position.Coordinate.Longitude;
-            if (position.Coordinate.Longitude > 0)
+#endif
+            if (latitude > 0)
             {
                 lonRef = 'E';
             }
