@@ -6,6 +6,7 @@ using System.Windows.Media.Imaging;
 #elif WINDOWS_PHONE_APP||WINDOWS_APP||NETFX_CORE
 using Windows.UI.Xaml.Media.Imaging;
 using System.Runtime.InteropServices.WindowsRuntime;
+
 #endif
 
 namespace NtImageProcessor
@@ -15,6 +16,8 @@ namespace NtImageProcessor
         private int[] red, green, blue;
 
         private int shiftBytes;
+
+        public int PixelSkipRate = 4;
 
         /// <summary>
         /// Used to specify histogram resolution.
@@ -76,7 +79,7 @@ namespace NtImageProcessor
             }
 
             _init();
-
+            IsRunning = false;
         }
 
         private void _init()
@@ -91,8 +94,6 @@ namespace NtImageProcessor
                 green[i] = 0;
                 blue[i] = 0;
             }
-
-            IsRunning = false;
         }
 
         /// <summary>
@@ -100,7 +101,7 @@ namespace NtImageProcessor
         /// </summary>
         /// <param name="source">Source image</param>
         /// <returns></returns>
-        public async Task CreateHistogram(WriteableBitmap source)
+        public async Task CreateHistogramAsync(WriteableBitmap source)
         {
             if (IsRunning)
             {
@@ -113,38 +114,64 @@ namespace NtImageProcessor
             IsRunning = true;
 
             await Task.Factory.StartNew(() => { CalculateHistogram(source); });
+
+        }
+
+#if WINDOWS_APP
+        /// <summary>
+        /// Start to create histogram. Once it's completed, OnHistogramCreated will be called.
+        /// Recommend to run this method on background task with lower priority.
+        /// </summary>
+        /// <param name="source">Source image</param>
+        /// <returns></returns>
+        public void CreateHistogram(WriteableBitmap source)
+        {
+            if (source == null || source.PixelBuffer == null)
+            {
+                return;
+            }
+            _init();
+            CalculateHistogramFromPixelBuffer(source);
+        }
+#endif
+
+        /// <summary>
+        /// Calculate histogram from WritableBitmap.Pixelbuffer.
+        /// </summary>
+        /// <param name="writableBitmap"></param>
+        private void CalculateHistogramFromPixelBuffer(WriteableBitmap writableBitmap)
+        {
+            var pixels = writableBitmap.PixelBuffer.ToArray();
+
+            for (int i = 0; i < pixels.Length; i += (PixelSkipRate << 2))
+            {
+                SortPixel(pixels[i], PixelColor.Blue);
+                SortPixel(pixels[i + 1], PixelColor.Green);
+                SortPixel(pixels[i + 2], PixelColor.Red);
+            }
+
+            for (int i = 0; i < Resolution; i++)
+            {
+                red[i] = red[i] >> 4;
+                green[i] = green[i] >> 4;
+                blue[i] = blue[i] >> 4;
+            }
+
+            if (OnHistogramCreated != null)
+            {
+                OnHistogramCreated(red, green, blue);
+            }
+            IsRunning = false;
         }
 
         private void CalculateHistogram(WriteableBitmap writableBitmap)
         {
 #if WINDOWS_PHONE
             var pixels = writableBitmap.Pixels;
-#elif WINDOWS_PHONE_APP||WINDOWS_APP||NETFX_CORE
-            var pixels = writableBitmap.PixelBuffer.ToArray();
-#endif
-            //foreach (int v in writableBitmap.Pixels)
             for (int i = 0; i < pixels.Length; i += 3)
             {
-                int value = pixels[i];
-
-                int b = (value & 0xFF);
-                value = value >> 8;
-                int g = (value & 0xFF);
-                value = value >> 8;
-                int r = value & 0xFF;
-
-                if (shiftBytes != 0)
-                {
-                    r = r >> shiftBytes;
-                    g = g >> shiftBytes;
-                    b = b >> shiftBytes;
-                }
-
-                red[r]++;
-                green[g]++;
-                blue[b]++;
+                SortPixel(pixels[i]);
             }
-
             // normalize values.
 
             for (int i = 0; i < Resolution; i++)
@@ -159,8 +186,60 @@ namespace NtImageProcessor
                 OnHistogramCreated(red, green, blue);
             }
 
+            Debug.WriteLine("finished.");
+
             IsRunning = false;
+#endif
         }
 
+        private void SortPixel(int value)
+        {
+            int b = (value & 0xFF);
+            value = value >> 8;
+            int g = (value & 0xFF);
+            value = value >> 8;
+            int r = value & 0xFF;
+
+            if (shiftBytes != 0)
+            {
+                r = r >> shiftBytes;
+                g = g >> shiftBytes;
+                b = b >> shiftBytes;
+            }
+
+            red[r]++;
+            green[g]++;
+            blue[b]++;
+        }
+
+        private void SortPixel(byte v, PixelColor color)
+        {
+            int value = (int)v;
+
+            if (shiftBytes != 0)
+            {
+                value = value >> shiftBytes;
+            }
+
+            switch (color)
+            {
+                case PixelColor.Red:
+                    red[value]++;
+                    break;
+                case PixelColor.Blue:
+                    blue[value]++;
+                    break;
+                case PixelColor.Green:
+                    green[value]++;
+                    break;
+            }
+        }
+
+        enum PixelColor
+        {
+            Red,
+            Blue,
+            Green,
+        }
     }
 }
