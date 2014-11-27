@@ -17,7 +17,11 @@ namespace NtImageProcessor
 
         private int shiftBytes;
 
-        public int PixelSkipRate = 4;
+        /// <summary>
+        /// In case this value is more than 1, only a pixel per specified length will be read and calculated.
+        /// 3 is set as default.
+        /// </summary>
+        public uint PixelSkipRate = 3;
 
         /// <summary>
         /// Used to specify histogram resolution.
@@ -143,7 +147,7 @@ namespace NtImageProcessor
         {
             var pixels = writableBitmap.PixelBuffer.ToArray();
 
-            for (int i = 0; i < pixels.Length; i += (PixelSkipRate << 2))
+            for (uint i = 0; i + 2 < pixels.Length; i += (PixelSkipRate << 2))
             {
                 SortPixel(pixels[i], PixelColor.Blue);
                 SortPixel(pixels[i + 1], PixelColor.Green);
