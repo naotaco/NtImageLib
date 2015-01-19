@@ -139,6 +139,7 @@ namespace NtImageProcessor
         }
 #endif
 
+#if WINDOWS_APP
         /// <summary>
         /// Calculate histogram from WritableBitmap.Pixelbuffer.
         /// </summary>
@@ -168,6 +169,7 @@ namespace NtImageProcessor
             IsRunning = false;
         }
 
+#endif
         private void CalculateHistogram(WriteableBitmap writableBitmap)
         {
 #if WINDOWS_PHONE
