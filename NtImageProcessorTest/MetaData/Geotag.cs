@@ -155,12 +155,14 @@ namespace NtImageProcessorTest.MetaData
                         var pic2 = mediaLibrary.SavePicture(string.Format("Exif addition test_" + count + "_stream_{0:yyyyMMdd_HHmmss}.jpg", DateTime.Now), newImageStream);
                     }
                     catch (NullReferenceException) { }
-                    finally { newImageStream.Close(); }
+                    finally { newImageStream.Dispose(); }
                     TestUtil.IsGpsDataAdded(originalMetadata, newMetadata);
 
                     count++;
                 }
-                GC.Collect(); // Saving many big images in short time, memory mey be run out and it may throws NullReferenceException.
+                
+
+                GC.Collect(); // Saving many big images in short time, memory mey be run out and it may throws NullReferenceException or OutOfMemoryException.
             }
         }
 

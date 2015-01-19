@@ -64,7 +64,7 @@ namespace NtImageProcessorTest
         public static byte[] GetResourceByteArray(string filename)
         {
             Stream myFileStream = GetResourceStream(filename);
-            byte[] buf = new byte[100000000];
+            byte[] buf = new byte[50000000];
             if (myFileStream.CanRead)
             {
                 int read;
