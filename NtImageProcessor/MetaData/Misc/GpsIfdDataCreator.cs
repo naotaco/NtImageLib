@@ -83,7 +83,7 @@ namespace NtImageProcessor.MetaData.Misc
 #elif WINDOWS_PHONE
             var longitude = position.Coordinate.Longitude;
 #endif
-            if (latitude > 0)
+            if (longitude > 0)
             {
                 lonRef = 'E';
             }
