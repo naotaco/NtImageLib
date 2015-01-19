@@ -12,6 +12,20 @@ namespace NtImageProcessor.MetaData
 {
     public static class JpegMetaDataParser
     {
+
+        /// <summary>
+        /// Parse metadata in given image on background thread.
+        /// </summary>
+        /// <param name="image">Jpeg file as a stream</param>
+        /// <returns>Structure which includes all metadata.</returns>
+        public static async Task<JpegMetaData> ParseImageAsync(byte[] image)
+        {
+            return await Task<JpegMetaData>.Run(() =>
+            {
+                return ParseImage(image);
+            }).ConfigureAwait(false);
+        }
+
         /// <summary>
         /// Parse jpeg image and returns it's metadata as structure.
         /// </summary>
@@ -61,7 +75,21 @@ namespace NtImageProcessor.MetaData
         }
 
         /// <summary>
-        /// Parse meta data in given image
+        /// Parse metadata in given image on background thread.
+        /// </summary>
+        /// <param name="image">Jpeg file as a stream</param>
+        /// <returns>Structure which includes all metadata.</returns>
+        public static async Task<JpegMetaData> ParseImageAsync(Stream image)
+        {
+            return await Task<JpegMetaData>.Run(() =>
+            {
+                return ParseImage(image);
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Parse meta data in given image. It blocks the thread.
+        /// From UI thread, using ParseImageAsync is recommended.
         /// </summary>
         /// <param name="image">Jpeg file as stream</param>
         /// <returns>All meta data.</returns>

@@ -13,10 +13,25 @@ namespace NtImageProcessor.MetaData.Composer
     public static class JpegMetaDataProcessor
     {
         /// <summary>
-        /// Set exif data to Jpeg file. 
+        /// Set exif data to Jpeg file asynchronously.
         /// Mess of this library; everything are caused by crazy Exif format.
         /// Note that this function overwrites ALL Exif data in the given image.
-        /// TODO: Support stream in this class.
+        /// </summary>
+        /// <param name="OriginalImage">Target image</param>
+        /// <param name="MetaData">An Exif data which will be added to the image.</param>
+        /// <returns>New image</returns>
+        public static async Task<byte[]> SetMetaDataAsync(byte[] OriginalImage, JpegMetaData MetaData)
+        {
+            return await Task<byte[]>.Run(() =>
+            {
+                return SetMetaData(OriginalImage, MetaData);
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Set exif data to Jpeg file; It blocks thread.
+        /// Mess of this library; everything are caused by crazy Exif format.
+        /// Note that this function overwrites ALL Exif data in the given image.
         /// </summary>
         /// <param name="OriginalImage">Target image</param>
         /// <param name="MetaData">An Exif data which will be added to the image.</param>
@@ -69,6 +84,30 @@ namespace NtImageProcessor.MetaData.Composer
             return NewImage;
         }
 
+        /// <summary>
+        /// Set exif data to Jpeg file asynchronously.
+        /// Mess of this library; everything are caused by crazy Exif format.
+        /// Note that this function overwrites ALL Exif data in the given image.
+        /// </summary>
+        /// <param name="OriginalImage">Target image. This will be disposed.</param>
+        /// <param name="MetaData">An Exif data which will be added to the image.</param>
+        /// <returns>New image on new stream.</returns>
+        public static async Task<Stream> SetMetaDataAsync(Stream OriginalImage, JpegMetaData MetaData)
+        {
+            return await Task<Stream>.Run(() =>
+            {
+                return SetMetaData(OriginalImage, MetaData);
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Set exif data to Jpeg file; It blocks thread.
+        /// Mess of this library; everything are caused by crazy Exif format.
+        /// Note that this function overwrites ALL Exif data in the given image.
+        /// </summary>
+        /// <param name="OriginalImage">Target image. This will be disposed.</param>
+        /// <param name="MetaData">An Exif data which will be added to the image.</param>
+        /// <returns>New image on new stream.</returns>
         public static Stream SetMetaData(Stream OriginalImage, JpegMetaData MetaData)
         {
             OriginalImage.Seek(0, SeekOrigin.Begin);
@@ -132,6 +171,7 @@ namespace NtImageProcessor.MetaData.Composer
             NewImage.Seek(0, SeekOrigin.Begin);
 
             // Debug.WriteLine("image size: " + NewImage.Length);
+            OriginalImage.Dispose();
             return NewImage;
         }
 
@@ -231,14 +271,14 @@ namespace NtImageProcessor.MetaData.Composer
             // finally, create byte array again
             primaryIfd = IfdComposer.ComposeIfdsection(NewMetaData.PrimaryIfd, OutputImageMetadataEndian);
 
-            
+
             if (NewMetaData.ExifIfd != null)
             {
                 NewMetaData.ExifIfd.Offset = 8 + (UInt32)primaryIfd.Length;
                 exifIfd = IfdComposer.ComposeIfdsection(NewMetaData.ExifIfd, OutputImageMetadataEndian);
             }
 
-            
+
             if (NewMetaData.GpsIfd != null)
             {
                 NewMetaData.GpsIfd.Offset = 8 + (UInt32)primaryIfd.Length + (UInt32)exifIfd.Length;

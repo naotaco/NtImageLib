@@ -14,6 +14,23 @@ namespace NtImageProcessor.MetaData
 {
     public static class MetaDataOperator
     {
+
+        /// <summary>
+        /// Add geometory information to given image as Exif data asynchronously.
+        /// </summary>
+        /// <param name="image">Raw data of Jpeg file</param>
+        /// <param name="position">Geometory information</param>
+        /// <param name="overwrite">In case geotag is already exists, it throws GpsInformationAlreadyExistsException by default.
+        ///  To overwrite current one, set true here.</param>
+        /// <returns>Jpeg data with geometory information.</returns>
+        public static async Task<byte[]> AddGeopositionAsync(byte[] image, Geoposition position, bool overwrite = false)
+        {
+            return await Task<byte[]>.Run(() =>
+            {
+                return AddGeoposition(image, position, overwrite);
+            }).ConfigureAwait(false);
+        }
+
         /// <summary>
         /// Add geometory information to given image as Exif data.
         /// </summary>
@@ -51,7 +68,24 @@ namespace NtImageProcessor.MetaData
         }
 
         /// <summary>
-        /// Add geometory information to given image as Exif data.
+        /// Add geometory information to given image as Exif data asynchronously.
+        /// </summary>
+        /// <param name="image">Raw data of Jpeg file as a stream.
+        /// Given stream will be disposed after adding location info.</param>
+        /// <param name="position">Geometory information</param>
+        /// /// <param name="overwrite">In case geotag is already exists, it throws GpsInformationAlreadyExistsException by default.
+        ///  To overwrite current one, set true here.</param>
+        /// <returns>Jpeg data with geometory information.</returns>
+        public static async Task<Stream> AddGeopositionAsync(Stream image, Geoposition position, bool overwrite = false)
+        {
+            return await Task<Stream>.Run(() =>
+            {
+                return AddGeoposition(image, position, overwrite);
+            }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Add geometory information to given image as Exif data. Blocks thread.
         /// </summary>
         /// <param name="image">Raw data of Jpeg file as a stream.
         /// Given stream will be disposed after adding location info.</param>
@@ -95,7 +129,7 @@ namespace NtImageProcessor.MetaData
         /// </summary>
         /// <param name="meta">Metadata with geotag</param>
         /// <returns></returns>
-        static JpegMetaData RemoveGeoinfo(JpegMetaData meta)
+        public static JpegMetaData RemoveGeoinfo(JpegMetaData meta)
         {
             if (meta.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
             {
