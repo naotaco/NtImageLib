@@ -22,7 +22,8 @@ namespace NtImageProcessor.MetaData.Composer
         /// <returns>New image</returns>
         public static async Task<byte[]> SetMetaDataAsync(byte[] OriginalImage, JpegMetaData MetaData)
         {
-            return await Task<byte[]>.Run(() =>
+            // It seems thrown exceptions will be raised by this "async" ...
+            return await Task<byte[]>.Run(async () =>
             {
                 return SetMetaData(OriginalImage, MetaData);
             }).ConfigureAwait(false);
@@ -94,7 +95,7 @@ namespace NtImageProcessor.MetaData.Composer
         /// <returns>New image on new stream.</returns>
         public static async Task<Stream> SetMetaDataAsync(Stream OriginalImage, JpegMetaData MetaData)
         {
-            return await Task<Stream>.Run(() =>
+            return await Task<Stream>.Run(async () =>
             {
                 return SetMetaData(OriginalImage, MetaData);
             }).ConfigureAwait(false);

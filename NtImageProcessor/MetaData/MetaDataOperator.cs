@@ -25,7 +25,8 @@ namespace NtImageProcessor.MetaData
         /// <returns>Jpeg data with geometory information.</returns>
         public static async Task<byte[]> AddGeopositionAsync(byte[] image, Geoposition position, bool overwrite = false)
         {
-            return await Task<byte[]>.Run(() =>
+            // It seems thrown exceptions will be raised by this "async" ...
+            return await Task<byte[]>.Run(async () =>
             {
                 return AddGeoposition(image, position, overwrite);
             }).ConfigureAwait(false);
@@ -78,7 +79,8 @@ namespace NtImageProcessor.MetaData
         /// <returns>Jpeg data with geometory information.</returns>
         public static async Task<Stream> AddGeopositionAsync(Stream image, Geoposition position, bool overwrite = false)
         {
-            return await Task<Stream>.Run(() =>
+            // It seems thrown exceptions will be raised by this "async" ...
+            return await Task<Stream>.Run(async () =>
             {
                 return AddGeoposition(image, position, overwrite);
             }).ConfigureAwait(false);

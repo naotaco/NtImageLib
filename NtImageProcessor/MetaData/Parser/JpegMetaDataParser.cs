@@ -20,7 +20,8 @@ namespace NtImageProcessor.MetaData
         /// <returns>Structure which includes all metadata.</returns>
         public static async Task<JpegMetaData> ParseImageAsync(byte[] image)
         {
-            return await Task<JpegMetaData>.Run(() =>
+            // It seems thrown exceptions will be raised by this "async" ...
+            return await Task<JpegMetaData>.Run(async () =>
             {
                 return ParseImage(image);
             }).ConfigureAwait(false);
@@ -81,7 +82,8 @@ namespace NtImageProcessor.MetaData
         /// <returns>Structure which includes all metadata.</returns>
         public static async Task<JpegMetaData> ParseImageAsync(Stream image)
         {
-            return await Task<JpegMetaData>.Run(() =>
+            // It seems thrown exceptions will be raised by this "async" ...
+            return await Task<JpegMetaData>.Run(async () =>
             {
                 return ParseImage(image);
             }).ConfigureAwait(false);
