@@ -51,7 +51,7 @@ namespace NtImageProcessor.MetaData
             // parse given image first
             var exif = JpegMetaDataParser.ParseImage(image);
 
-            if (!overwrite && (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG) || exif.GpsIfd != null))
+            if (!overwrite && exif.IsGeotagExist)
             {
                 Debug.WriteLine("This image contains GPS information.");
                 throw new GpsInformationAlreadyExistsException("This image contains GPS information.");
@@ -106,7 +106,7 @@ namespace NtImageProcessor.MetaData
             // parse given image first
             var exif = JpegMetaDataParser.ParseImage(image);
 
-            if (!overwrite && (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG) || exif.GpsIfd != null))
+            if (!overwrite && exif.IsGeotagExist)
             {
                 Debug.WriteLine("This image contains GPS information.");
                 throw new GpsInformationAlreadyExistsException("This image contains GPS information.");

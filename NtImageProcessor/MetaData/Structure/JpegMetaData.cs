@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NtImageProcessor.MetaData.Misc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,6 +48,20 @@ namespace NtImageProcessor.MetaData.Structure
 
         public JpegMetaData() { }
 
-
+        /// <summary>
+        /// Returns whether geotag is recorded or not.
+        /// </summary>
+        /// <returns>True if geotag is exists</returns>
+        public bool IsGeotagExist
+        {
+            get
+            {
+                if (!PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG)) { return false; }
+                if (GpsIfd == null || GpsIfd.Length < 1) { return false; }
+                if (GpsIfd.Entries.ContainsKey(Definitions.GPS_STATUS_TAG) &&
+                    GpsIfd.Entries[Definitions.GPS_STATUS_TAG].StringValue.Contains(Definitions.GPS_STATUS_MEASUREMENT_VOID)) { return false; }
+                return true;
+            }
+        }
     }
 }

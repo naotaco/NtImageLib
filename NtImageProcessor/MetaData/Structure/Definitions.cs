@@ -26,5 +26,9 @@ namespace NtImageProcessor.MetaData.Misc
 
         public const UInt32 EXIF_IFD_POINTER_TAG = 0x8769;
         public const UInt32 GPS_IFD_POINTER_TAG = 0x8825;
+
+        public const UInt32 GPS_STATUS_TAG = 0x09;
+        public const string GPS_STATUS_MEASUREMENT_ACTIVE = "A";
+        public const string GPS_STATUS_MEASUREMENT_VOID = "V";
     }
 }
