@@ -5,14 +5,15 @@ Provides functions to analyze / operate JPEG file in C#.
 
 - No dependencies
 - Works on WindowsPhone 8/8.1
++ For UWP (Windows 10), See [new one](https://github.com/naotaco/NtImageProcessorUwp)
 - The latest Visual Studio Express 2012 is required to run included tests.
 
 ## JPEG metadata (Exif and other) operator
 
 ### Parser/Builder
 
-JpegMetaDataParser parses metadata in JPEG image file simply. 
-Both of byte array and byte stream are supported as input format.  
+JpegMetaDataParser parses metadata in JPEG image file simply.
+Both of byte array and byte stream are supported as input format.
 JpegMetaData structure may contains 3 sections(called IFD), Primary, Exif, and GPS.
 Each IFD has a dictionary of Entry with keys.
 
@@ -39,7 +40,7 @@ var exif = JpegMetaDataParser.ParseImage(image);
 // check whether the image already contains GPS section or not
 if (exif.PrimaryIfd.Entries.ContainsKey(Definitions.GPS_IFD_POINTER_TAG))
 {
-	// You can throw excpetion 
+	// You can throw excpetion
 	throw new GpsInformationAlreadyExistsException("This image contains GPS information.");
 }
 // or overwrite section.
